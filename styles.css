@@ -2823,6 +2823,10 @@ button:hover {
     backdrop-filter: blur(12px);
 }
 
+.loading-overlay.hidden {
+    display: none;
+}
+
 .loading-overlay-card {
     min-width: 180px;
     max-width: min(240px, calc(100vw - 40px));
