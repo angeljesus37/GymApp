@@ -41,6 +41,31 @@
     --switch-track-border: rgba(148, 163, 184, 0.18);
     --switch-thumb-bg: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(226, 232, 240, 0.92));
     --switch-thumb-shadow: 0 5px 14px rgba(2, 6, 23, 0.24);
+    --panel-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.74), rgba(15, 23, 42, 0.94));
+    --panel-border: rgba(148, 163, 184, 0.14);
+    --tile-bg: rgba(255,255,255,0.03);
+    --tile-bg-soft: rgba(255,255,255,0.025);
+    --tile-border: rgba(148, 163, 184, 0.14);
+    --tile-border-soft: rgba(148, 163, 184, 0.12);
+    --list-item-bg: rgba(2, 6, 23, 0.28);
+    --list-item-border: rgba(148, 163, 184, 0.1);
+    --history-header-bg: rgba(255,255,255,0.02);
+    --history-month-title: rgba(226, 232, 240, 0.9);
+    --history-collapse-bg: rgba(255,255,255,0.04);
+    --history-collapse-stroke: rgba(226, 232, 240, 0.88);
+    --month-input-bg: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(15, 23, 42, 0.42));
+    --month-input-hover-bg: linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(15, 23, 42, 0.5));
+    --modal-backdrop-bg: linear-gradient(180deg, rgba(2, 6, 23, 0.32), rgba(2, 6, 23, 0.42));
+    --overview-card-bg: linear-gradient(180deg, rgba(96, 165, 250, 0.12), rgba(15, 23, 42, 0.38));
+    --overview-card-shadow: 0 10px 22px rgba(2, 6, 23, 0.14);
+    --tag-bg: rgba(255,255,255,0.025);
+    --tag-hover-bg: rgba(102, 126, 234, 0.15);
+    --control-surface: rgba(255,255,255,0.02);
+    --control-surface-strong: rgba(255,255,255,0.03);
+    --control-surface-gradient: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03));
+    --control-surface-gradient-collapsed: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    --row-bg: rgba(255,255,255,0.025);
+    --muted-group-bg: rgba(148, 163, 184, 0.08);
 }
 
 :root[data-theme="light"] {
@@ -78,6 +103,31 @@
     --switch-track-border: rgba(148, 163, 184, 0.24);
     --switch-thumb-bg: linear-gradient(180deg, rgba(255,255,255,1), rgba(248, 250, 252, 0.96));
     --switch-thumb-shadow: 0 5px 14px rgba(148, 163, 184, 0.28);
+    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.98));
+    --panel-border: rgba(148, 163, 184, 0.18);
+    --tile-bg: rgba(248, 250, 252, 0.88);
+    --tile-bg-soft: rgba(255,255,255,0.9);
+    --tile-border: rgba(148, 163, 184, 0.2);
+    --tile-border-soft: rgba(148, 163, 184, 0.18);
+    --list-item-bg: rgba(241, 245, 249, 0.92);
+    --list-item-border: rgba(148, 163, 184, 0.18);
+    --history-header-bg: rgba(248, 250, 252, 0.9);
+    --history-month-title: rgba(71, 85, 105, 0.94);
+    --history-collapse-bg: rgba(255,255,255,0.9);
+    --history-collapse-stroke: rgba(71, 85, 105, 0.86);
+    --month-input-bg: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(241, 245, 249, 0.96));
+    --month-input-hover-bg: linear-gradient(180deg, rgba(219, 234, 254, 0.88), rgba(239, 246, 255, 0.96));
+    --modal-backdrop-bg: linear-gradient(180deg, rgba(226, 232, 240, 0.58), rgba(203, 213, 225, 0.7));
+    --overview-card-bg: linear-gradient(180deg, rgba(219, 234, 254, 0.92), rgba(239, 246, 255, 0.98));
+    --overview-card-shadow: 0 10px 22px rgba(148, 163, 184, 0.16);
+    --tag-bg: rgba(255,255,255,0.92);
+    --tag-hover-bg: rgba(219, 234, 254, 0.92);
+    --control-surface: rgba(255,255,255,0.88);
+    --control-surface-strong: rgba(248, 250, 252, 0.94);
+    --control-surface-gradient: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(241, 245, 249, 0.94));
+    --control-surface-gradient-collapsed: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248, 250, 252, 0.9));
+    --row-bg: rgba(248, 250, 252, 0.92);
+    --muted-group-bg: rgba(203, 213, 225, 0.42);
 }
 
 body {
@@ -951,14 +1001,14 @@ button:hover {
 
 #cancel-workout-btn {
     width: auto;
-    background: rgba(255,255,255,0.02);
+    background: var(--control-surface);
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     box-shadow: none;
 }
 
 #cancel-workout-btn:hover {
-    background: rgba(255,255,255,0.03);
+    background: var(--control-surface-strong);
     color: var(--text-light);
     box-shadow: none;
 }
@@ -1229,7 +1279,7 @@ button:hover {
     min-width: 44px;
     padding: 0;
     border-radius: 50%;
-    background: rgba(255,255,255,0.02);
+    background: var(--control-surface);
     border: 1px solid rgba(148, 163, 184, 0.14);
     color: var(--text-muted);
     box-shadow: none;
@@ -1291,7 +1341,7 @@ button:hover {
     width: auto;
     padding: 0;
     font-size: 0.78rem;
-    background: rgba(255,255,255,0.02);
+    background: var(--control-surface);
     border: 1px solid rgba(251, 113, 133, 0.2);
     color: #fda4af;
     box-shadow: none;
@@ -1303,7 +1353,7 @@ button:hover {
 
 .muted-group-header {
     border-left-color: var(--text-muted);
-    background: rgba(148, 163, 184, 0.08);
+    background: var(--muted-group-bg);
 }
 
 .muted-group-header h3 {
@@ -1339,7 +1389,7 @@ button:hover {
     height: 44px;
     padding: 0;
     border-radius: 50%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03));
+    background: var(--control-surface-gradient);
     border: 1px solid rgba(148, 163, 184, 0.2);
     color: transparent;
     display: inline-flex;
@@ -1426,7 +1476,7 @@ button:hover {
 }
 
 .exercise-card.collapsed .toggle-exercise-btn {
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    background: var(--control-surface-gradient-collapsed);
 }
 
 .exercise-card.collapsed .toggle-exercise-btn::before {
@@ -1494,7 +1544,7 @@ button:hover {
     align-items: flex-start;
     gap: 10px;
     padding: 12px;
-    background: rgba(255,255,255,0.025);
+    background: var(--row-bg);
     border-radius: 12px;
     border-left: 2px solid var(--border-color);
     transition: background-color 0.3s, border-color 0.3s;
@@ -1586,8 +1636,8 @@ button:hover {
 .history-panel-card {
     padding: 14px;
     border-radius: 18px;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.74), rgba(15, 23, 42, 0.94));
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     box-shadow: var(--shadow-card);
     min-width: 0;
 }
@@ -1617,8 +1667,8 @@ button:hover {
 .progress-panel {
     padding: 14px;
     border-radius: 18px;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.74), rgba(15, 23, 42, 0.94));
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     box-shadow: var(--shadow-card);
     min-width: 0;
     overflow: hidden;
@@ -1642,8 +1692,8 @@ button:hover {
 .weight-summary-card {
     padding: 12px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border);
 }
 
 .progress-summary-card strong,
@@ -1735,8 +1785,8 @@ button:hover {
     min-height: 78px;
     padding: 8px 6px;
     border-radius: 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: var(--tile-bg-soft);
+    border: 1px solid var(--tile-border-soft);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -1811,8 +1861,8 @@ button:hover {
     gap: 12px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border-soft);
     color: var(--text-muted);
 }
 
@@ -1832,8 +1882,8 @@ button:hover {
 .nutrition-panel {
     padding: 14px;
     border-radius: 18px;
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.74), rgba(15, 23, 42, 0.94));
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
     box-shadow: var(--shadow-card);
     min-width: 0;
 }
@@ -1877,8 +1927,8 @@ button:hover {
 .nutrition-summary-card {
     padding: 12px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(148, 163, 184, 0.14);
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border);
 }
 
 .nutrition-summary-card strong {
@@ -1908,8 +1958,8 @@ button:hover {
 .nutrition-meal-card {
     padding: 12px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border-soft);
 }
 
 .nutrition-meal-header {
@@ -1969,8 +2019,8 @@ button:hover {
     gap: 10px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(2, 6, 23, 0.28);
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: var(--list-item-bg);
+    border: 1px solid var(--list-item-border);
 }
 
 .nutrition-entry-copy {
@@ -2021,8 +2071,8 @@ button:hover {
     text-align: left;
     padding: 12px;
     border-radius: 14px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    background: var(--tile-bg);
+    border: 1px solid var(--tile-border-soft);
     box-shadow: none;
 }
 
@@ -2078,7 +2128,7 @@ button:hover {
     padding: 10px 12px;
     border-radius: 999px;
     border: 1px solid rgba(96, 165, 250, 0.18);
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(15, 23, 42, 0.42));
+    background: var(--month-input-bg);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     font-size: 0.8rem;
     text-align: center;
@@ -2087,7 +2137,7 @@ button:hover {
 
 .history-filter-month-input:hover {
     border-color: rgba(96, 165, 250, 0.32);
-    background: linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(15, 23, 42, 0.5));
+    background: var(--month-input-hover-bg);
 }
 
 .history-filter-month-input:focus {
@@ -2123,7 +2173,7 @@ button:hover {
 }
 
 .secondary-btn {
-    background: rgba(255,255,255,0.025);
+    background: var(--tile-bg-soft);
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     padding: 10px 12px;
@@ -2131,7 +2181,7 @@ button:hover {
 }
 
 .secondary-btn:hover {
-    background: rgba(255,255,255,0.03);
+    background: var(--tile-bg);
     color: var(--text-light);
 }
 
@@ -2159,7 +2209,7 @@ button:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background: linear-gradient(180deg, rgba(2, 6, 23, 0.32), rgba(2, 6, 23, 0.42));
+    background: var(--modal-backdrop-bg);
     backdrop-filter: blur(10px);
     cursor: pointer;
     animation: modalBackdropIn 0.2s ease-out;
@@ -2235,9 +2285,9 @@ button:hover {
 .history-overview-card {
     padding: 10px 12px;
     border-radius: 14px;
-    background: linear-gradient(180deg, rgba(96, 165, 250, 0.12), rgba(15, 23, 42, 0.38));
+    background: var(--overview-card-bg);
     border: 1px solid rgba(96, 165, 250, 0.14);
-    box-shadow: 0 10px 22px rgba(2, 6, 23, 0.14);
+    box-shadow: var(--overview-card-shadow);
 }
 
 .history-overview-card-wide {
@@ -2267,7 +2317,7 @@ button:hover {
 .history-month-title {
     margin: 0 0 8px;
     padding: 0 4px;
-    color: rgba(226, 232, 240, 0.9);
+    color: var(--history-month-title);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -2298,7 +2348,7 @@ button:hover {
     gap: 10px;
     align-items: stretch;
     padding: 10px 11px;
-    background: rgba(255,255,255,0.02);
+    background: var(--history-header-bg);
     border-bottom: 1px solid var(--border-color);
     position: relative;
 }
@@ -2334,8 +2384,8 @@ button:hover {
     min-height: 34px;
     padding: 0;
     border-radius: 12px;
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--tile-border);
+    background: var(--history-collapse-bg);
     box-shadow: none;
     position: relative;
 }
@@ -2347,8 +2397,8 @@ button:hover {
     left: 50%;
     width: 10px;
     height: 10px;
-    border-right: 2px solid rgba(226, 232, 240, 0.88);
-    border-bottom: 2px solid rgba(226, 232, 240, 0.88);
+    border-right: 2px solid var(--history-collapse-stroke);
+    border-bottom: 2px solid var(--history-collapse-stroke);
     transform: translate(-50%, -60%) rotate(45deg);
     transition: transform 0.22s ease;
 }
@@ -2419,7 +2469,7 @@ button:hover {
     gap: 4px;
     padding: 3px 6px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.035);
+    background: var(--tile-bg-soft);
     border: 1px solid rgba(148, 163, 184, 0.16);
     font-size: 0.62rem;
     color: var(--text-muted);
@@ -2475,7 +2525,7 @@ button:hover {
 .history-exercise-item {
     margin-bottom: 10px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--tile-border-soft);
 }
 
 .history-exercise-group {
@@ -2542,7 +2592,7 @@ button:hover {
     width: auto;
     padding: 5px 7px;
     font-size: 0.66rem;
-    background: rgba(255,255,255,0.02);
+    background: var(--tile-bg-soft);
     border: 1px solid rgba(59, 130, 246, 0.4);
     color: var(--accent-blue);
     box-shadow: none;
@@ -2561,7 +2611,7 @@ button:hover {
 }
 
 .set-tag {
-    background: rgba(255,255,255,0.025);
+    background: var(--tag-bg);
     border: 1px solid var(--border-color);
     border-radius: 999px;
     padding: 3px 7px;
@@ -2572,7 +2622,7 @@ button:hover {
 }
 
 .set-tag:hover {
-    background: rgba(102, 126, 234, 0.15);
+    background: var(--tag-hover-bg);
     border-color: var(--accent-blue);
     color: var(--text-light);
 }
