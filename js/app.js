@@ -10,6 +10,7 @@ import { createWorkoutController } from './ui/workout.js';
 const STORAGE_KEY_PREFIX = 'app-entrenamiento-active-workout';
 const ACTIVE_TAB_KEY_PREFIX = 'app-entrenamiento-active-tab';
 const AUTH_USER_KEY = 'app-entrenamiento-auth-user';
+const THEME_STORAGE_KEY = 'app-entrenamiento-theme';
 const LOCAL_SAVE_INTERVAL = 3000;
 const SERVER_SAVE_INTERVAL = 30000;
 
@@ -30,6 +31,8 @@ function getElements() {
         userMenuPopover: document.getElementById('user-menu-popover'),
         currentUserDisplay: document.getElementById('current-user-display'),
         currentUserName: document.getElementById('current-user-name'),
+        themeToggleBtn: document.getElementById('theme-toggle-btn'),
+        themeToggleHint: document.getElementById('theme-toggle-hint'),
         logoutBtn: document.getElementById('logout-btn'),
         setupView: document.getElementById('setup-view'),
         activeWorkoutView: document.getElementById('active-workout-view'),
@@ -128,6 +131,7 @@ export function initApp() {
     const elements = getElements();
     const state = createAppState();
     const bootState = window.__TRAINING_APP_BOOT__ || null;
+    const systemThemeMediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     const today = new Date().toISOString().split('T')[0];
     const navTabs = [
         { name: 'workout', button: elements.navNewWorkoutBtn },
@@ -147,6 +151,64 @@ export function initApp() {
         elements.authStatus.textContent = text;
         elements.authStatus.dataset.tone = tone;
         elements.authStatus.classList.toggle('is-visible', Boolean(text));
+    }
+
+    function getStoredThemePreference() {
+        try {
+            const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+            return storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function getSystemTheme() {
+        return systemThemeMediaQuery?.matches ? 'dark' : 'light';
+    }
+
+    function getEffectiveTheme() {
+        return getStoredThemePreference() || getSystemTheme();
+    }
+
+    function updateThemeToggle(theme, automatic = false) {
+        if (!elements.themeToggleBtn) {
+            return;
+        }
+
+        const isLight = theme === 'light';
+        elements.themeToggleBtn.setAttribute('aria-checked', isLight ? 'true' : 'false');
+        elements.themeToggleBtn.setAttribute('aria-label', isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+        if (elements.themeToggleHint) {
+            elements.themeToggleHint.textContent = automatic
+                ? 'Automático según el sistema'
+                : (isLight ? 'Fijado en claro' : 'Fijado en oscuro');
+        }
+    }
+
+    function applyTheme(theme, automatic = false) {
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        updateThemeToggle(theme, automatic);
+    }
+
+    function toggleTheme() {
+        const nextTheme = getEffectiveTheme() === 'dark' ? 'light' : 'dark';
+        try {
+            window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+        } catch (error) {
+            // Ignore write failures and still apply in-memory for this session.
+        }
+        applyTheme(nextTheme, false);
+    }
+
+    function syncThemeWithSystem() {
+        const storedPreference = getStoredThemePreference();
+        if (storedPreference) {
+            applyTheme(storedPreference, false);
+            return;
+        }
+
+        applyTheme(getSystemTheme(), true);
     }
 
     function formatUserName(username) {
@@ -658,6 +720,9 @@ export function initApp() {
     elements.togglePasswordBtn.addEventListener('click', () => {
         setPasswordVisibility(elements.loginPasswordInput.type === 'password');
     });
+    elements.themeToggleBtn?.addEventListener('click', () => {
+        toggleTheme();
+    });
 
     window.addEventListener('beforeunload', () => {
         if (state.currentWorkout) {
@@ -697,6 +762,20 @@ export function initApp() {
         }
     });
 
+    if (systemThemeMediaQuery) {
+        const handleSystemThemeChange = () => {
+            if (!getStoredThemePreference()) {
+                applyTheme(getSystemTheme(), true);
+            }
+        };
+
+        if (typeof systemThemeMediaQuery.addEventListener === 'function') {
+            systemThemeMediaQuery.addEventListener('change', handleSystemThemeChange);
+        } else if (typeof systemThemeMediaQuery.addListener === 'function') {
+            systemThemeMediaQuery.addListener(handleSystemThemeChange);
+        }
+    }
+
     window.addEventListener('resize', () => updateNavHighlight());
 
     if (bootState?.username) {
@@ -704,6 +783,7 @@ export function initApp() {
         state.activeTab = bootState.activeTab || state.activeTab;
     }
 
+    syncThemeWithSystem();
     setPasswordVisibility(false);
     requestAnimationFrame(() => updateNavHighlight());
     restoreAuthSession();

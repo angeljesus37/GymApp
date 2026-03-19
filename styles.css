@@ -22,14 +22,70 @@
     --success: #10b981;
     --shadow-soft: 0 18px 42px rgba(2, 6, 23, 0.28);
     --shadow-card: 0 10px 24px rgba(2, 6, 23, 0.2);
+    --page-glow-top: rgba(59, 130, 246, 0.14);
+    --page-glow-bottom: rgba(16, 185, 129, 0.08);
+    --page-bg: var(--dark-bg);
+    --header-bg: linear-gradient(135deg, rgba(96, 165, 250, 0.18), rgba(37, 99, 235, 0.08));
+    --header-border: rgba(148, 163, 184, 0.12);
+    --menu-avatar-bg: linear-gradient(180deg, rgba(96, 165, 250, 0.22), rgba(37, 99, 235, 0.18));
+    --menu-avatar-border: rgba(96, 165, 250, 0.24);
+    --menu-popover-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.96));
+    --nav-bg: rgba(15, 23, 42, 0.48);
+    --auth-card-bg: radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 28%), linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+    --auth-card-border: rgba(96, 165, 250, 0.14);
+    --auth-shell-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.86));
+    --toggle-surface: rgba(255,255,255,0.045);
+    --toggle-surface-border: rgba(148, 163, 184, 0.16);
+    --toggle-surface-hover: rgba(96, 165, 250, 0.12);
+    --switch-track-bg: rgba(255,255,255,0.06);
+    --switch-track-border: rgba(148, 163, 184, 0.18);
+    --switch-thumb-bg: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(226, 232, 240, 0.92));
+    --switch-thumb-shadow: 0 5px 14px rgba(2, 6, 23, 0.24);
+}
+
+:root[data-theme="light"] {
+    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    --danger-gradient: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+    --surface-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(241, 245, 249, 0.98) 100%);
+    --accent-blue: #2563eb;
+    --accent-blue-strong: #1d4ed8;
+    --dark-bg: #eef4ff;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: rgba(255, 255, 255, 0.98);
+    --surface-strong: rgba(255, 255, 255, 0.96);
+    --text-light: #0f172a;
+    --text-muted: #475569;
+    --border-color: rgba(148, 163, 184, 0.28);
+    --border-strong: rgba(148, 163, 184, 0.4);
+    --shadow-soft: 0 18px 42px rgba(148, 163, 184, 0.22);
+    --shadow-card: 0 10px 24px rgba(148, 163, 184, 0.18);
+    --page-glow-top: rgba(59, 130, 246, 0.16);
+    --page-glow-bottom: rgba(14, 165, 233, 0.08);
+    --page-bg: #eef4ff;
+    --header-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(226, 232, 240, 0.88));
+    --header-border: rgba(148, 163, 184, 0.2);
+    --menu-avatar-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(219, 234, 254, 0.92));
+    --menu-avatar-border: rgba(96, 165, 250, 0.26);
+    --menu-popover-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.97));
+    --nav-bg: rgba(255, 255, 255, 0.8);
+    --auth-card-bg: radial-gradient(circle at top right, rgba(96, 165, 250, 0.12), transparent 28%), linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.98));
+    --auth-card-border: rgba(96, 165, 250, 0.18);
+    --auth-shell-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    --toggle-surface: rgba(148, 163, 184, 0.08);
+    --toggle-surface-border: rgba(148, 163, 184, 0.22);
+    --toggle-surface-hover: rgba(96, 165, 250, 0.08);
+    --switch-track-bg: rgba(148, 163, 184, 0.18);
+    --switch-track-border: rgba(148, 163, 184, 0.24);
+    --switch-thumb-bg: linear-gradient(180deg, rgba(255,255,255,1), rgba(248, 250, 252, 0.96));
+    --switch-thumb-shadow: 0 5px 14px rgba(148, 163, 184, 0.28);
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     background:
-        radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 28%),
-        radial-gradient(circle at bottom, rgba(16, 185, 129, 0.08), transparent 24%),
-        var(--dark-bg);
+        radial-gradient(circle at top, var(--page-glow-top), transparent 28%),
+        radial-gradient(circle at bottom, var(--page-glow-bottom), transparent 24%),
+        var(--page-bg);
     color: var(--text-light);
     min-height: 100vh;
     padding: 14px;
@@ -56,10 +112,10 @@ header {
     text-align: left;
     margin-bottom: 14px;
     padding: 14px 16px;
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.18), rgba(37, 99, 235, 0.08));
+    background: var(--header-bg);
     border-radius: 18px;
     box-shadow: var(--shadow-soft);
-    border: 1px solid rgba(148, 163, 184, 0.12);
+    border: 1px solid var(--header-border);
     backdrop-filter: blur(16px);
 }
 
@@ -92,8 +148,8 @@ header {
     min-height: 42px;
     padding: 0;
     border-radius: 50%;
-    background: linear-gradient(180deg, rgba(96, 165, 250, 0.22), rgba(37, 99, 235, 0.18));
-    border: 1px solid rgba(96, 165, 250, 0.24);
+    background: var(--menu-avatar-bg);
+    border: 1px solid var(--menu-avatar-border);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 22px rgba(2, 6, 23, 0.18);
     display: inline-flex;
     align-items: center;
@@ -121,15 +177,86 @@ header {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 190px;
-    max-width: min(190px, calc(100vw - 28px));
+    width: 230px;
+    max-width: min(230px, calc(100vw - 28px));
     padding: 12px;
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.96));
+    background: var(--menu-popover-bg);
     border: 1px solid rgba(148, 163, 184, 0.16);
     box-shadow: 0 18px 34px rgba(2, 6, 23, 0.28);
     backdrop-filter: blur(18px);
     z-index: 120;
+}
+
+.theme-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.theme-toggle-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.theme-toggle-title {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.theme-toggle-hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+
+.theme-toggle-btn {
+    width: 58px;
+    min-width: 58px;
+    min-height: 34px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--switch-track-bg);
+    border: 1px solid var(--switch-track-border);
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(96, 165, 250, 0.16);
+    box-shadow: none;
+    transform: none;
+}
+
+.theme-toggle-btn[aria-checked="true"] {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.92), rgba(37, 99, 235, 0.92));
+    border-color: rgba(37, 99, 235, 0.32);
+}
+
+.theme-toggle-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--switch-thumb-bg);
+    box-shadow: var(--switch-thumb-shadow);
+    transform: translateX(0);
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle-btn[aria-checked="true"] .theme-toggle-thumb {
+    transform: translateX(24px);
 }
 
 .current-user-name {
@@ -168,7 +295,7 @@ main {
     gap: 6px;
     margin-bottom: 14px;
     padding: 6px;
-    background: rgba(15, 23, 42, 0.48);
+    background: var(--nav-bg);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
     backdrop-filter: blur(24px) saturate(160%);
@@ -347,10 +474,8 @@ section h2 {
 #auth-view {
     max-width: 520px;
     margin: 24px auto 0;
-    background:
-        radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 28%),
-        linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
-    border-color: rgba(96, 165, 250, 0.14);
+    background: var(--auth-card-bg);
+    border-color: var(--auth-card-border);
     box-shadow: 0 22px 44px rgba(2, 6, 23, 0.28);
 }
 
@@ -393,7 +518,7 @@ section h2 {
     gap: 10px;
     padding: 4px 6px 4px 12px;
     border-radius: 16px;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.86));
+    background: var(--auth-shell-bg);
     border: 1px solid rgba(148, 163, 184, 0.16);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
@@ -438,8 +563,8 @@ section h2 {
     min-width: 74px;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(255,255,255,0.045);
-    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: var(--toggle-surface);
+    border: 1px solid var(--toggle-surface-border);
     color: var(--text-light);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     font-size: 0.76rem;
@@ -453,7 +578,7 @@ section h2 {
 }
 
 .toggle-password-btn:hover {
-    background: rgba(96, 165, 250, 0.12);
+    background: var(--toggle-surface-hover);
     border-color: rgba(96, 165, 250, 0.26);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
@@ -580,9 +705,76 @@ select {
     border-radius: 14px;
     font-size: 0.97rem;
     background: var(--input-bg);
-    color: white;
+    color: var(--text-light);
     font-family: inherit;
     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+:root[data-theme="light"] .user-menu-btn {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 10px 22px rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme="light"] .user-menu-popover {
+    box-shadow: 0 18px 34px rgba(148, 163, 184, 0.24);
+}
+
+:root[data-theme="light"] #main-nav {
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 4px 24px rgba(148, 163, 184, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+:root[data-theme="light"] #main-nav::before {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(219, 234, 254, 0.82) 100%), linear-gradient(135deg, rgba(96, 165, 250, 0.18) 0%, rgba(37, 99, 235, 0.08) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.18);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.84), inset 0 -1px 1px rgba(148, 163, 184, 0.08), 0 8px 28px rgba(148, 163, 184, 0.18), 0 2px 8px rgba(96, 165, 250, 0.1);
+}
+
+:root[data-theme="light"] #main-nav::after {
+    opacity: 0.38;
+}
+
+:root[data-theme="light"] .nav-btn {
+    color: var(--text-light);
+}
+
+:root[data-theme="light"] #auth-view {
+    box-shadow: 0 22px 44px rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme="light"] .auth-input-shell {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78);
+}
+
+:root[data-theme="light"] button:hover {
+    box-shadow: 0 12px 22px rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme="light"] .edit-groups-btn {
+    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(241,245,249,0.9));
+    border-color: rgba(148, 163, 184, 0.24);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.84), 0 10px 20px rgba(148, 163, 184, 0.16);
+}
+
+:root[data-theme="light"] .exercise-card {
+    border-color: rgba(148, 163, 184, 0.14);
+    box-shadow: 0 8px 20px rgba(148, 163, 184, 0.14);
+}
+
+:root[data-theme="light"] .exercise-card:hover {
+    box-shadow: 0 10px 26px rgba(148, 163, 184, 0.18);
+}
+
+:root[data-theme="light"] .exercise-history-btn {
+    background: rgba(255,255,255,0.8);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="light"] .secondary-btn {
+    background: rgba(255,255,255,0.72);
+}
+
+:root[data-theme="light"] .secondary-btn:hover {
+    background: rgba(255,255,255,0.92);
 }
 
 input:focus, select:focus {
