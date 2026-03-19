@@ -1,0 +1,22 @@
+{
+    "users": {
+        "mario": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        },
+        "prueba": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        }
+    }
+}

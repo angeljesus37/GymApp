@@ -1,0 +1,1320 @@
+{
+    "users": {
+        "mario": [
+            {
+                "date": "2026-03-16",
+                "types": [
+                    "Pierna",
+                    "Hombro"
+                ],
+                "exercises": [
+                    {
+                        "name": "Sentadilla",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 22.5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 22.5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Extensión cuádriceps",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Atrás Femoral",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 7,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 6,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Press militar",
+                        "type": "Hombro",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 16,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 18,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Adelante",
+                        "type": "Hombro",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 8,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "c7b3e60c-92a9-404a-ae30-f8c5b745055e"
+            },
+            {
+                "date": "2026-03-12",
+                "types": [
+                    "Espalda",
+                    "Biceps"
+                ],
+                "exercises": [
+                    {
+                        "name": "Remo Máquina",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 50,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 54,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 54,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Barra Grande Arriba Polea",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 50,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 55,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 11,
+                                "weight": 55,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 55,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Remo polea atrás",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 55,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 60,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 65,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 65,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Martillo",
+                        "type": "Biceps",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 14,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 14,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 14,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Polea (Nueva)",
+                        "type": "Biceps",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 27,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 32,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 32,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": null,
+                                "weight": 32,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "010b937d-0072-456e-853b-7ca312109e77"
+            },
+            {
+                "date": "2026-03-11",
+                "types": [
+                    "Pierna",
+                    "Hombro"
+                ],
+                "exercises": [
+                    {
+                        "name": "Sentadilla",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 22.5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 22.5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Extensión cuádriceps",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 11,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Atrás Femoral",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 7,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 5,
+                                "weight": 12,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Press militar",
+                        "type": "Hombro",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 16,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 18,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Adelante",
+                        "type": "Hombro",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 8,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "35123e97-003d-452a-a1f2-a15af0369526"
+            },
+            {
+                "date": "2026-03-10",
+                "types": [
+                    "Pecho",
+                    "Triceps"
+                ],
+                "exercises": [
+                    {
+                        "name": "Press Banca",
+                        "type": "Pecho",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 11,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Press Inclinado",
+                        "type": "Pecho",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 25,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 6,
+                                "weight": 25,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 6,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Aperturas Malas",
+                        "type": "Pecho",
+                        "sets": [
+                            {
+                                "reps": 14,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 14,
+                                "weight": 25,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Tríceps barra polea (antigua)",
+                        "type": "Triceps",
+                        "sets": [
+                            {
+                                "reps": 20,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 18,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 45,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 50,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": true
+                    }
+                ],
+                "id": "e119a872-583b-4051-b70b-491e17169e48"
+            }
+        ],
+        "prueba": [],
+        "andrius": [
+            {
+                "date": "2026-03-16",
+                "types": [
+                    "Pierna",
+                    "Abdominales"
+                ],
+                "exercises": [
+                    {
+                        "name": "Sentadilla",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 45,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 50,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Extensión cuádriceps",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 10,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Femoral tumbado",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 11,
+                                "weight": 2,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 2,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Hiperextension",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            }
+                        ],
+                        "collapsed": true
+                    },
+                    {
+                        "name": "Hiptrust",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 10,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Piernas arriba",
+                        "type": "Abdominales",
+                        "sets": [
+                            {
+                                "reps": 20,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 14,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 14,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 13,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": null,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Máquina",
+                        "type": "Abdominales",
+                        "sets": [
+                            {
+                                "reps": 11,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": null,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "c3304999-21b7-474f-a16f-ebda6977250f",
+                "isDraft": false
+            },
+            {
+                "date": "2026-03-12",
+                "types": [
+                    "Espalda",
+                    "Abdominales"
+                ],
+                "exercises": [
+                    {
+                        "name": "Remo maquina",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 12,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 15,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Jalón al pecho",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 10,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Remo polea",
+                        "type": "Espalda",
+                        "sets": [
+                            {
+                                "reps": 11,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 35,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Piernas arriba",
+                        "type": "Abdominales",
+                        "sets": [
+                            {
+                                "reps": 20,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 14,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 14,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 13,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": null,
+                                "weight": null,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": false
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Máquina",
+                        "type": "Abdominales",
+                        "sets": [
+                            {
+                                "reps": 11,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "1b9316aa-7d05-4561-b333-95429dc4feed"
+            },
+            {
+                "date": "2026-03-11",
+                "types": [
+                    "Pierna",
+                    "Cardio"
+                ],
+                "exercises": [
+                    {
+                        "name": "Sentadilla",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 10,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 10,
+                                "weight": 40,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 45,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 6,
+                                "weight": 45,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Extensión cuádriceps",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 10,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 8,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 30,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 12,
+                                "weight": 20,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Femoral tumbado",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 11,
+                                "weight": 2,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 7,
+                                "weight": 5,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 9,
+                                "weight": 2,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Hiperextension",
+                        "type": "Pierna",
+                        "sets": [
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            },
+                            {
+                                "reps": 15,
+                                "weight": 10,
+                                "durationSeconds": null,
+                                "avgSpeed": null,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    },
+                    {
+                        "name": "Elíptica",
+                        "type": "Cardio",
+                        "sets": [
+                            {
+                                "reps": null,
+                                "weight": null,
+                                "durationSeconds": 600,
+                                "avgSpeed": 8.5,
+                                "completed": true
+                            }
+                        ],
+                        "collapsed": false
+                    }
+                ],
+                "id": "b175093b-5168-4b0a-ac75-d7f6ee12801d"
+            }
+        ],
+        "saraposadaas": []
+    }
+}

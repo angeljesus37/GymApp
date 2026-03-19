@@ -1,0 +1,40 @@
+{
+    "users": {
+        "mario": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        },
+        "prueba": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        },
+        "andrius": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        },
+        "saraposadaas": {
+            "goals": {
+                "calories": null,
+                "protein": null,
+                "carbs": null,
+                "fat": null
+            },
+            "entries": []
+        }
+    }
+}

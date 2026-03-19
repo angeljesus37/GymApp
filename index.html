@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>App de Entrenamiento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-bar">
+            <h1>Registro de Entrenamiento</h1>
+            <div id="user-session-bar" class="user-session-bar hidden">
+                <button id="user-menu-btn" class="user-menu-btn" type="button" aria-label="Abrir menú de usuario" aria-expanded="false" aria-controls="user-menu-popover">
+                    <span id="current-user-display" class="current-user-display"></span>
+                </button>
+                <div id="user-menu-popover" class="user-menu-popover hidden" role="menu" aria-label="Menú de usuario">
+                    <p id="current-user-name" class="current-user-name"></p>
+                    <button id="logout-btn" class="secondary-btn logout-btn" type="button">Cerrar sesión</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="auth-view">
+            <div class="auth-card-header">
+                <span class="auth-kicker">Acceso personal</span>
+                <h2>Iniciar sesión</h2>
+                <p class="auth-copy">Accede con tu usuario para ver y guardar tus entrenamientos. Si no existe, puedes crearlo al momento.</p>
+            </div>
+            <form id="auth-form" novalidate>
+                <div class="form-group auth-field-group">
+                    <label for="login-username">Usuario</label>
+                    <div class="auth-input-shell">
+                        <span class="auth-input-icon" aria-hidden="true">@</span>
+                        <input type="text" id="login-username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Usuario">
+                    </div>
+                </div>
+                <div class="form-group auth-field-group">
+                    <label for="login-password">Contraseña</label>
+                    <div class="auth-input-shell auth-password-shell">
+                        <span class="auth-input-icon" aria-hidden="true">#</span>
+                        <input type="password" id="login-password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Contraseña">
+                        <button type="button" id="toggle-password-btn" class="toggle-password-btn" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+                            <span class="toggle-password-glyph" aria-hidden="true"></span>
+                            <span class="toggle-password-text">Ver</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="auth-actions">
+                    <button id="login-btn" type="submit">Entrar</button>
+                    <button id="register-btn" type="button" class="secondary-btn">Crear usuario</button>
+                </div>
+            </form>
+            <p id="auth-status" class="auth-status"></p>
+        </section>
+
+        <div id="app-shell" class="hidden">
+        <!-- Navegación Principal -->
+        <nav id="main-nav">
+            <button id="nav-new-workout" class="nav-btn active" data-tab="workout">Entrenamiento</button>
+            <button id="nav-history" class="nav-btn" data-tab="history">Historial</button>
+            <button id="nav-progress" class="nav-btn" data-tab="progress">Progreso</button>
+            <button id="nav-nutrition" class="nav-btn" data-tab="nutrition">Nutricion</button>
+        </nav>
+
+        <!-- Vista para configurar un nuevo entreno -->
+        <section id="setup-view">
+            <h2>Nuevo Entrenamiento</h2>
+            <div class="form-group">
+                <label for="workout-date">Fecha</label>
+                <input type="date" id="workout-date">
+            </div>
+            <button id="start-workout-btn">Comenzar Entrenamiento</button>
+        </section>
+
+        <!-- Vista para el entreno en curso -->
+        <section id="active-workout-view" class="hidden">
+            <div id="workout-header">
+                <div class="workout-info">
+                    <div class="workout-meta-row">
+                        <div class="workout-title-wrapper">
+                            <h3 id="workout-type-display" class="workout-type">-</h3>
+                            <button id="muscle-group-toggle-btn" class="edit-groups-btn" aria-label="Editar grupos musculares" type="button">
+                                <span class="edit-groups-icon" aria-hidden="true"></span>
+                                <span class="edit-groups-label">Grupos</span>
+                            </button>
+                        </div>
+                        <p id="workout-date-display" class="workout-date"></p>
+                    </div>
+                    <p id="save-status" class="save-status"></p>
+                </div>
+                <div class="workout-actions">
+                    <button id="view-history-btn">Ver Historial</button>
+                    <button id="cancel-workout-btn" class="secondary-btn">Cancelar</button>
+                    <button id="finish-workout-btn">Guardar</button>
+                </div>
+            </div>
+
+            <div class="native-group-picker-shell" aria-hidden="true">
+                <label class="sr-only" for="muscle-group-select">Grupos musculares</label>
+                <select id="muscle-group-select" class="muscle-group-native-select muscle-group-direct-select" multiple size="9" aria-label="Seleccionar grupos musculares">
+                    <option value="Pecho">Pecho</option>
+                    <option value="Espalda">Espalda</option>
+                    <option value="Pierna">Pierna</option>
+                    <option value="Hombro">Hombro</option>
+                    <option value="Triceps">Triceps</option>
+                    <option value="Biceps">Biceps</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Abdominales">Abdominales</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <button id="load-exercises-btn" type="button" class="native-group-load-btn" tabindex="-1" aria-hidden="true">Cargar Ejercicios Seleccionados</button>
+            </div>
+
+            <div id="exercises-container">
+                <!-- Los ejercicios se añadirán aquí dinámicamente -->
+            </div>
+            
+            <div id="add-exercise-form">
+                <h3>Añadir Ejercicio</h3>
+                <div class="form-group">
+                    <select id="exercise-type-select" aria-label="Grupo muscular del ejercicio">
+                        <option value="Sin Grupo">Sin grupo</option>
+                    </select>
+                    <input type="text" id="exercise-name-input" placeholder="Nombre del Ejercicio">
+                    <button id="add-exercise-btn">Añadir Ejercicio</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vista de Historial General (Nueva) -->
+        <section id="history-view" class="hidden">
+            <div class="section-header-row history-view-head">
+                <div>
+                    <h2>Historial de Entrenamientos</h2>
+                    <p class="section-subcopy">Consulta rápido sesiones pasadas y filtra solo cuando lo necesites.</p>
+                </div>
+                <button id="toggle-history-tools-btn" type="button" class="section-toggle-btn secondary-btn" aria-expanded="true">Ocultar filtros</button>
+            </div>
+            <div id="history-tools-panel" class="history-tools-panel">
+                <div class="history-panel-card history-filters-card">
+                    <div class="history-panel-head">
+                        <div>
+                            <h3>Filtros</h3>
+                            <p class="section-subcopy">Ajusta grupo, fecha exacta, mes o ejercicio para acotar el listado.</p>
+                        </div>
+                    </div>
+                    <div class="filters-container">
+                        <div class="form-group history-filter-group history-filter-group-type">
+                            <label for="history-filter-type" class="history-filter-label">Grupo muscular</label>
+                            <select id="history-filter-type">
+                                <option value="Todos">Todos</option>
+                                <option value="Pecho">Pecho</option>
+                                <option value="Espalda">Espalda</option>
+                                <option value="Pierna">Pierna</option>
+                                <option value="Hombro">Hombro</option>
+                                <option value="Triceps">Triceps</option>
+                                <option value="Biceps">Biceps</option>
+                                <option value="Cardio">Cardio</option>
+                                <option value="Abdominales">Abdominales</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group history-filter-group history-filter-group-date history-filter-group-date-exact">
+                            <label for="history-filter-date" class="history-filter-label">Fecha</label>
+                            <input type="date" id="history-filter-date">
+                        </div>
+                        <div class="form-group history-filter-group history-filter-group-month">
+                            <label for="history-filter-month" class="history-filter-label">Mes</label>
+                            <input type="month" id="history-filter-month" class="history-filter-month-input">
+                        </div>
+                        <div class="form-group history-filter-group history-filter-group-exercise">
+                            <label for="history-filter-exercise" class="history-filter-label">Ejercicio</label>
+                            <input type="text" id="history-filter-exercise" list="history-exercise-options" placeholder="Buscar o seleccionar ejercicio" autocomplete="off" spellcheck="false">
+                            <datalist id="history-exercise-options"></datalist>
+                        </div>
+                        <div class="filters-actions">
+                            <button id="apply-filters-btn">Filtrar</button>
+                            <button id="clear-filters-btn" class="secondary-btn">Borrar filtros</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="history-overview-shell" class="history-panel-card history-overview-shell hidden">
+                <div class="history-panel-head">
+                    <div>
+                        <h3>Resumen</h3>
+                        <p class="section-subcopy">Vista rápida de sesiones, ejercicios, series y volumen según los filtros activos.</p>
+                    </div>
+                </div>
+                <div id="history-overview" class="history-overview hidden"></div>
+            </div>
+            <div id="full-history-container">
+                <!-- Lista de historial -->
+            </div>
+        </section>
+
+        <section id="progress-view" class="hidden">
+            <div class="section-header-row progress-view-head">
+                <div>
+                    <h2>Pantalla de Progreso</h2>
+                    <p class="section-subcopy">Actividad mensual, resumen semanal y evolución de tu peso corporal.</p>
+                </div>
+            </div>
+
+            <div class="progress-top-panel">
+                <article class="progress-weight-entry-card">
+                    <div class="progress-panel-header compact-panel-header">
+                        <div>
+                            <h3>Peso corporal</h3>
+                            <p class="section-subcopy">Registra tu peso para seguir la evolución.</p>
+                        </div>
+                    </div>
+                    <div class="progress-weight-form">
+                        <div class="form-group">
+                            <label for="body-weight-date">Fecha</label>
+                            <input type="date" id="body-weight-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="body-weight-input">Peso</label>
+                            <input type="number" id="body-weight-input" placeholder="Peso corporal" inputmode="decimal" step="0.1" min="0">
+                        </div>
+                        <button id="save-body-weight-btn" type="button">Guardar peso</button>
+                    </div>
+                </article>
+            </div>
+
+            <div id="progress-summary-grid" class="progress-summary-grid"></div>
+
+            <div class="progress-layout">
+                <article class="progress-panel progress-calendar-panel">
+                    <div class="progress-panel-header">
+                        <button id="progress-prev-month-btn" type="button" class="calendar-nav-btn secondary-btn" aria-label="Mes anterior">&lsaquo;</button>
+                        <div class="progress-panel-heading">
+                            <h3 id="progress-month-label">Mes</h3>
+                            <p class="section-subcopy">Calendario mensual de actividad</p>
+                        </div>
+                        <button id="progress-next-month-btn" type="button" class="calendar-nav-btn secondary-btn" aria-label="Mes siguiente">&rsaquo;</button>
+                    </div>
+                    <div class="progress-calendar-weekdays">
+                        <span>Lun</span>
+                        <span>Mar</span>
+                        <span>Mié</span>
+                        <span>Jue</span>
+                        <span>Vie</span>
+                        <span>Sáb</span>
+                        <span>Dom</span>
+                    </div>
+                    <div id="progress-calendar-grid" class="progress-calendar-grid"></div>
+                </article>
+
+                <article class="progress-panel progress-weight-panel">
+                    <div class="progress-panel-header">
+                        <div class="progress-panel-heading">
+                            <h3>Evolución de peso</h3>
+                            <p id="body-weight-status" class="section-subcopy">Sin registros todavía.</p>
+                        </div>
+                    </div>
+                    <div id="body-weight-summary" class="body-weight-summary"></div>
+                    <div class="progress-weight-chart-wrap">
+                        <canvas id="body-weight-chart" width="400" height="240"></canvas>
+                    </div>
+                    <div id="body-weight-history" class="body-weight-history"></div>
+                </article>
+            </div>
+        </section>
+
+        <section id="nutrition-view" class="hidden">
+            <div class="section-header-row nutrition-view-head">
+                <div>
+                    <h2>Nutricion</h2>
+                    <p class="section-subcopy">Registra alimentos por dia, controla macros y compara tu ingesta con tus objetivos.</p>
+                </div>
+            </div>
+
+            <div class="nutrition-top-layout">
+                <article class="nutrition-panel nutrition-goals-panel">
+                    <div class="progress-panel-header compact-panel-header">
+                        <div>
+                            <h3>Objetivos diarios</h3>
+                            <p class="section-subcopy">Define tus metas de kcal y macros para medir adherencia.</p>
+                        </div>
+                    </div>
+                    <div class="nutrition-goals-form">
+                        <div class="form-group">
+                            <label for="nutrition-goal-calories">Kcal</label>
+                            <input type="number" id="nutrition-goal-calories" placeholder="2400" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-goal-protein">Proteina</label>
+                            <input type="number" id="nutrition-goal-protein" placeholder="180" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-goal-carbs">Carbohidratos</label>
+                            <input type="number" id="nutrition-goal-carbs" placeholder="260" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-goal-fat">Grasas</label>
+                            <input type="number" id="nutrition-goal-fat" placeholder="70" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <button id="save-nutrition-goals-btn" type="button">Guardar objetivos</button>
+                    </div>
+                </article>
+
+                <article class="nutrition-panel nutrition-entry-panel">
+                    <div class="progress-panel-header compact-panel-header">
+                        <div>
+                            <h3>Registrar alimento</h3>
+                            <p class="section-subcopy">Apunta gramos, kcal y macros para cualquier comida del dia.</p>
+                        </div>
+                    </div>
+                    <div class="nutrition-entry-form">
+                        <div class="form-group">
+                            <label for="nutrition-date">Fecha</label>
+                            <input type="date" id="nutrition-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-meal">Momento</label>
+                            <select id="nutrition-meal">
+                                <option value="Desayuno">Desayuno</option>
+                                <option value="Comida">Comida</option>
+                                <option value="Cena">Cena</option>
+                                <option value="Snack">Snack</option>
+                                <option value="Pre entreno">Pre entreno</option>
+                                <option value="Post entreno">Post entreno</option>
+                            </select>
+                        </div>
+                        <div class="form-group nutrition-entry-name-group">
+                            <label for="nutrition-food-name">Alimento</label>
+                            <input type="text" id="nutrition-food-name" placeholder="Arroz con pollo">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-food-grams">Gramos</label>
+                            <input type="number" id="nutrition-food-grams" placeholder="200" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-food-calories">Kcal</label>
+                            <input type="number" id="nutrition-food-calories" placeholder="420" inputmode="decimal" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-food-protein">Proteina</label>
+                            <input type="number" id="nutrition-food-protein" placeholder="32" inputmode="decimal" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-food-carbs">Carbs</label>
+                            <input type="number" id="nutrition-food-carbs" placeholder="48" inputmode="decimal" step="0.1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="nutrition-food-fat">Grasas</label>
+                            <input type="number" id="nutrition-food-fat" placeholder="11" inputmode="decimal" step="0.1" min="0">
+                        </div>
+                        <div class="form-group nutrition-entry-notes-group">
+                            <label for="nutrition-food-notes">Notas</label>
+                            <input type="text" id="nutrition-food-notes" placeholder="Antes de entrenar / hecho en casa / etc.">
+                        </div>
+                        <button id="save-nutrition-entry-btn" type="button">Guardar alimento</button>
+                    </div>
+                </article>
+            </div>
+
+            <div id="nutrition-summary-grid" class="nutrition-summary-grid"></div>
+
+            <div class="nutrition-bottom-layout">
+                <article class="nutrition-panel nutrition-day-panel">
+                    <div class="progress-panel-header">
+                        <div class="progress-panel-heading">
+                            <h3>Registro del dia</h3>
+                            <p id="nutrition-day-status" class="section-subcopy">Sin alimentos registrados.</p>
+                        </div>
+                    </div>
+                    <div id="nutrition-entries-container" class="nutrition-entries-container"></div>
+                </article>
+
+                <article class="nutrition-panel nutrition-recent-panel">
+                    <div class="progress-panel-header">
+                        <div class="progress-panel-heading">
+                            <h3>Dias recientes</h3>
+                            <p class="section-subcopy">Resumen rapido de adherencia y volumen de comida.</p>
+                        </div>
+                    </div>
+                    <div id="nutrition-recent-days" class="nutrition-recent-days"></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Modal para el historial -->
+        <div id="history-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Historial de <span id="history-muscle-group"></span></h2>
+                    <button id="close-modal-btn" class="close-btn">&times;</button>
+                </div>
+                <div id="history-container">
+                    <!-- El historial se cargará aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación/Alerta Personalizado -->
+        <div id="dialog-modal" class="modal hidden" style="z-index: 2000;">
+            <div class="modal-content dialog-content">
+                <h3 id="dialog-title">Confirmación</h3>
+                <p id="dialog-message">¿Estás seguro?</p>
+                <div class="dialog-actions">
+                    <button id="dialog-cancel-btn" class="secondary-btn">Cancelar</button>
+                    <button id="dialog-confirm-btn" class="primary-btn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </main>
+
+    <!-- Modal para gráfico de evolución -->
+    <div id="chart-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="chart-heading">
+                    <h2 id="chart-title">Evolución</h2>
+                    <p id="chart-subtitle" class="chart-subtitle"></p>
+                </div>
+                <button id="close-chart-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="chart-toolbar">
+                <div id="chart-metric-tabs" class="chart-metric-tabs" role="tablist" aria-label="Métricas de evolución">
+                    <button type="button" class="chart-metric-btn active" data-metric="avgWeight">Peso medio</button>
+                    <button type="button" class="chart-metric-btn" data-metric="maxWeight">Peso máximo</button>
+                    <button type="button" class="chart-metric-btn" data-metric="totalReps">Reps totales</button>
+                    <button type="button" class="chart-metric-btn" data-metric="volume">Volumen</button>
+                </div>
+            </div>
+            <div id="chart-stat-grid" class="chart-stat-grid"></div>
+            <div class="chart-canvas-wrap">
+                <canvas id="chart-canvas" width="400" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="exercise-history-modal" class="modal hidden">
+        <div class="modal-content exercise-history-modal-content">
+            <div class="modal-header">
+                <div class="chart-heading">
+                    <h2 id="exercise-history-title">Historial del ejercicio</h2>
+                    <p id="exercise-history-subtitle" class="chart-subtitle"></p>
+                </div>
+                <button id="close-exercise-history-btn" class="close-btn" type="button">&times;</button>
+            </div>
+            <div id="exercise-history-container" class="exercise-history-container"></div>
+        </div>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Template para un ejercicio (oculto) -->
+    <template id="exercise-template">
+        <div class="exercise-card">
+            <div class="exercise-header">
+                <div class="exercise-heading">
+                    <div class="exercise-title-row">
+                        <h4 class="exercise-title"></h4>
+                    </div>
+                    <span class="exercise-group-badge"></span>
+                </div>
+                <div class="exercise-controls">
+                    <button class="exercise-history-btn" type="button" aria-label="Ver historial del ejercicio" title="Ver historial del ejercicio">
+                        <span class="exercise-history-icon" aria-hidden="true"></span>
+                    </button>
+                    <button class="toggle-exercise-btn" aria-label="Minimizar ejercicio" aria-expanded="true"></button>
+                    <button class="delete-exercise-btn" aria-label="Eliminar ejercicio"><span class="delete-text">Eliminar</span><span class="delete-icon">✕</span></button>
+                </div>
+            </div>
+            <div class="sets-container">
+                <!-- Las series se añadirán aquí -->
+            </div>
+            <button class="add-set-btn">+ Añadir Nueva Serie</button>
+        </div>
+    </template>
+
+    <!-- Template para una serie (oculto) -->
+    <template id="set-template">
+        <div class="set-row">
+            <span class="set-number"></span>
+            <div class="set-inputs">
+                <div class="input-group">
+                    <input type="number" class="weight-input" placeholder="Peso" inputmode="decimal" step="0.25" min="0" enterkeyhint="next" autocomplete="off">
+                    <span class="input-label">kg</span>
+                </div>
+                <div class="input-group">
+                    <input type="number" class="reps-input" placeholder="Reps" inputmode="numeric" step="1" min="0" enterkeyhint="done" autocomplete="off">
+                    <span class="input-label">Reps</span>
+                </div>
+            </div>
+            <div class="set-actions">
+                <button class="confirm-set-btn">✓</button>
+                <button class="delete-set-btn">✕</button>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

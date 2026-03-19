@@ -1,0 +1,1226 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Vistas y elementos principales
+    const setupView = document.getElementById('setup-view');
+    const activeWorkoutView = document.getElementById('active-workout-view');
+    const historyView = document.getElementById('history-view');
+    const workoutDateInput = document.getElementById('workout-date');
+    const muscleGroupToggleBtn = document.getElementById('muscle-group-toggle-btn');
+    const muscleGroupModal = document.getElementById('muscle-group-modal');
+    const closeMuscleGroupModalBtn = document.getElementById('close-muscle-group-modal-btn');
+    const loadExercisesBtn = document.getElementById('load-exercises-btn');
+    const startWorkoutBtn = document.getElementById('start-workout-btn');
+    const workoutTypeDisplay = document.getElementById('workout-type-display');
+    const workoutDateDisplay = document.getElementById('workout-date-display');
+    const exercisesContainer = document.getElementById('exercises-container');
+    const exerciseNameInput = document.getElementById('exercise-name-input');
+    const addExerciseBtn = document.getElementById('add-exercise-btn');
+    const finishWorkoutBtn = document.getElementById('finish-workout-btn');
+    const viewHistoryBtn = document.getElementById('view-history-btn');
+    const cancelWorkoutBtn = document.getElementById('cancel-workout-btn');
+
+    // Navegación y Filtros de Historial
+    const navNewWorkoutBtn = document.getElementById('nav-new-workout');
+    const navHistoryBtn = document.getElementById('nav-history');
+    const historyFilterType = document.getElementById('history-filter-type');
+    const historyFilterDate = document.getElementById('history-filter-date');
+    const applyFiltersBtn = document.getElementById('apply-filters-btn');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+    const fullHistoryContainer = document.getElementById('full-history-container');
+
+    // Modal de Historial
+    const historyModal = document.getElementById('history-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const historyContainer = document.getElementById('history-container');
+    const historyMuscleGroup = document.getElementById('history-muscle-group');
+
+    // Modal de Diálogo (Custom Alert/Confirm)
+    const dialogModal = document.getElementById('dialog-modal');
+    const dialogTitle = document.getElementById('dialog-title');
+    const dialogMessage = document.getElementById('dialog-message');
+    const dialogCancelBtn = document.getElementById('dialog-cancel-btn');
+    const dialogConfirmBtn = document.getElementById('dialog-confirm-btn');
+    let currentDialogResolve = null; // Para manejar la promesa del confirm
+
+    // Templates
+    const exerciseTemplate = document.getElementById('exercise-template');
+    const setTemplate = document.getElementById('set-template');
+
+    // Estado de la aplicación
+    let currentWorkout = null;
+    let selectedMuscleGroups = new Set(); // Conjunto de grupos musculares seleccionados
+    let isSavingToServer = false; // Flag para evitar múltiples guardados simultáneos
+
+
+    // --- INICIALIZACIÓN ---
+    function initialize() {
+        // Default dates: today
+        const d = new Date();
+        const today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        workoutDateInput.value = today;
+        startWorkoutBtn.addEventListener('click', startWorkout);
+        addExerciseBtn.addEventListener('click', addExercise);
+        finishWorkoutBtn.addEventListener('click', finishWorkout);
+        cancelWorkoutBtn.addEventListener('click', cancelWorkout);
+        viewHistoryBtn.addEventListener('click', showHistory);
+        closeModalBtn.addEventListener('click', () => historyModal.classList.add('hidden'));
+        // Cerrar history modal al hacer click fuera (compatible con iOS)
+        historyModal.addEventListener('click', (event) => {
+            if (event.target === historyModal) {
+                historyModal.classList.add('hidden');
+            }
+        });
+        
+        // Eventos del Dialog Modal
+        dialogCancelBtn.addEventListener('click', () => closeDialog(false));
+        dialogConfirmBtn.addEventListener('click', () => closeDialog(true));
+        // Cerrar dialog al hacer click fuera (compatible con iOS)
+        dialogModal.addEventListener('click', (event) => {
+            if (event.target === dialogModal) closeDialog(false);
+        });
+
+        // Eventos de navegación y filtros
+        navNewWorkoutBtn.addEventListener('click', () => switchTab('workout'));
+        navHistoryBtn.addEventListener('click', () => switchTab('history'));
+        applyFiltersBtn.addEventListener('click', loadFullHistory);
+        if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', clearFilters);
+        
+        // Listener para botón de toggle del modal de grupos musculares
+        if (muscleGroupToggleBtn) muscleGroupToggleBtn.addEventListener('click', () => {
+            muscleGroupModal.classList.remove('hidden');
+        });
+        
+        // Cerrar modal al clickear el botón X
+        if (closeMuscleGroupModalBtn) {
+            closeMuscleGroupModalBtn.addEventListener('click', () => {
+                muscleGroupModal.classList.add('hidden');
+            });
+        }
+        
+        // Cerrar modal al clickear fuera (en el backdrop)
+        if (muscleGroupModal) {
+            muscleGroupModal.addEventListener('click', (event) => {
+                if (event.target === muscleGroupModal) {
+                    muscleGroupModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Listener para botón de cargar ejercicios seleccionados
+        if (loadExercisesBtn) loadExercisesBtn.addEventListener('click', loadExercisesForSelectedGroups);
+    }
+
+    // --- SISTEMA DE DIÁLOGOS PERSONALIZADOS ---
+    
+    function showCustomConfirm(title, message) {
+        return new Promise((resolve) => {
+            dialogTitle.textContent = title;
+            dialogMessage.textContent = message;
+            dialogCancelBtn.classList.remove('hidden');
+            dialogConfirmBtn.textContent = "Confirmar";
+            dialogModal.classList.remove('hidden');
+            currentDialogResolve = resolve;
+        });
+    }
+
+    function showCustomAlert(title, message) {
+        return new Promise((resolve) => {
+            dialogTitle.textContent = title;
+            dialogMessage.textContent = message;
+            dialogCancelBtn.classList.add('hidden'); // Ocultar cancelar para alertas
+            dialogConfirmBtn.textContent = "Aceptar";
+            dialogModal.classList.remove('hidden');
+            currentDialogResolve = resolve;
+        });
+    }
+
+    function closeDialog(result) {
+        dialogModal.classList.add('hidden');
+        if (currentDialogResolve) {
+            currentDialogResolve(result);
+            currentDialogResolve = null;
+        }
+    }
+
+    // --- LÓGICA DE PERSISTENCIA DE SESIÓN ---
+
+    function saveStateToSession() {
+        if (currentWorkout) {
+            try {
+                // Extraer tipos de los ejercicios como respaldo
+                const typesFromExercises = new Set();
+                currentWorkout.exercises.forEach(ex => {
+                    if (ex.type && ex.type !== 'Sin Grupo') {
+                        typesFromExercises.add(ex.type);
+                    }
+                });
+                
+                // Combinar tipos: los de selectedMuscleGroups + los extraídos de ejercicios
+                const allTypes = new Set([...selectedMuscleGroups, ...typesFromExercises]);
+                
+                // Crear un backup del estado actual antes de guardar
+                const workoutToSave = {
+                    date: currentWorkout.date,
+                    exercises: currentWorkout.exercises.map(ex => ({
+                        name: ex.name,
+                        type: ex.type || null,
+                        collapsed: ex.collapsed || false,
+                        sets: ex.sets ? ex.sets.map(s => ({
+                            reps: s.reps !== undefined ? s.reps : null,
+                            weight: s.weight !== undefined ? s.weight : null
+                        })) : []
+                    })),
+                    types: Array.from(allTypes)
+                };
+                
+                // Guardar en almacenamiento (compatible con Safari iOS)
+                safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(workoutToSave));
+                console.log('✓ Entrenamiento guardado. Tipos:', workoutToSave.types, 'Ejercicios:', workoutToSave.exercises.length);
+            } catch (error) {
+                console.error('Error guardando:', error);
+                // Intentar guardar respaldo
+                try {
+                    safeSetItem(SESSION_STORAGE_KEY + '_backup', JSON.stringify({
+                        date: currentWorkout.date,
+                        exercises: currentWorkout.exercises,
+                        types: Array.from(selectedMuscleGroups),
+                        timestamp: new Date().toISOString()
+                    }));
+                    console.log('✓ Backup guardado');
+                } catch (e) {
+                    console.error('Error guardando backup:', e);
+                }
+            }
+        } else {
+            safeRemoveItem(SESSION_STORAGE_KEY);
+            safeRemoveItem(SESSION_STORAGE_KEY + '_backup');
+        }
+    }
+
+    // Control para guardado en servidor (solo para Safari iOS)
+    let serverSaveInterval = null;
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+    function startAutoSave() {
+        // Limpiar autosave anterior si existe
+        if (autoSaveInterval) clearInterval(autoSaveInterval);
+        
+        // Auto-guardar en almacenamiento local cada 3 segundos
+        autoSaveInterval = setInterval(() => {
+            if (currentWorkout) {
+                saveStateToSession();
+            }
+        }, 3000);
+        console.log('Auto-guardado local activado (cada 3 segundos)');
+
+        // En Safari iOS, también guardar al servidor cada 30 segundos como respaldo
+        if (isIOS) {
+            startServerSave();
+        }
+    }
+
+    function stopAutoSave() {
+        if (autoSaveInterval) {
+            clearInterval(autoSaveInterval);
+            autoSaveInterval = null;
+            console.log('Auto-guardado local desactivado');
+        }
+        
+        if (serverSaveInterval) {
+            clearInterval(serverSaveInterval);
+            serverSaveInterval = null;
+            console.log('Auto-guardado servidor desactivado');
+        }
+    }
+
+    function startServerSave() {
+        // Solo en Safari iOS, guardar en servidor cada 30 segundos
+        if (serverSaveInterval) clearInterval(serverSaveInterval);
+        
+        serverSaveInterval = setInterval(() => {
+            if (currentWorkout && isIOS) {
+                saveWorkoutDraftToServer();
+            }
+        }, 30000); // Cada 30 segundos
+        console.log('Auto-guardado servidor activado (cada 30 segundos en iOS)');
+    }
+
+    async function saveWorkoutDraftToServer() {
+        /**
+         * Guarda un borrador del entrenamiento actual en el servidor.
+         * Esto es importante para Safari iOS donde el almacenamiento local puede perderse.
+         */
+        if (!currentWorkout) return;
+        
+        try {
+            const draftData = {
+                ...currentWorkout,
+                types: Array.from(selectedMuscleGroups),
+                isDraft: true,
+                savedAt: new Date().toISOString()
+            };
+            
+            // Intentar guardar silenciosamente sin bloquear la UI
+            fetch('/api/save_workout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(draftData)
+            }).catch(() => {
+                // Silenciar errores de red
+                console.log('⚠️ Borrador no guardado en servidor (sin conexión)');
+            });
+        } catch (e) {
+            console.log('Error preparando borrador:', e);
+        }
+    }
+
+    function checkForActiveSession() {
+        // Primero verificar disponibilidad de almacenamiento
+        testStorageAvailability();
+        
+        let savedWorkout = null;
+        
+        // Primero intentar recuperar del almacenamiento
+        try {
+            const stored = safeGetItem(SESSION_STORAGE_KEY);
+            if (stored) {
+                savedWorkout = JSON.parse(stored);
+                console.log('✓ Sesión recuperada del almacenamiento');
+            }
+        } catch (error) {
+            console.warn('Error leyendo almacenamiento:', error);
+        }
+
+        // Si no hay, intentar del respaldo
+        if (!savedWorkout) {
+            try {
+                const backup = safeGetItem(SESSION_STORAGE_KEY + '_backup');
+                if (backup) {
+                    savedWorkout = JSON.parse(backup);
+                    console.log('✓ Sesión recuperada del respaldo');
+                }
+            } catch (error) {
+                console.warn('Error leyendo respaldo:', error);
+            }
+        }
+
+        // Si encontramos una sesión guardada, restaurarla
+        if (savedWorkout) {
+            try {
+                // Validar que tenga estructura correcta  
+                if (!savedWorkout.date) {
+                    throw new Error('Sesión inválida: falta la fecha');
+                }
+
+                currentWorkout = {
+                    date: savedWorkout.date,
+                    exercises: Array.isArray(savedWorkout.exercises) ? savedWorkout.exercises : [],
+                    types: savedWorkout.types || [],
+                    id: savedWorkout.id || null
+                };
+
+                // Deduplicar ejercicios para evitar duplicados al restaurar
+                const uniqueExercises = [];
+                const exerciseKeys = new Set();
+                currentWorkout.exercises.forEach(ex => {
+                    const key = `${ex.name}|${ex.type || 'Sin Grupo'}`;
+                    if (!exerciseKeys.has(key)) {
+                        exerciseKeys.add(key);
+                        uniqueExercises.push(ex);
+                    }
+                });
+                currentWorkout.exercises = uniqueExercises;
+
+                // Restaurar los tipos seleccionados
+                selectedMuscleGroups.clear();
+                if (Array.isArray(savedWorkout.types) && savedWorkout.types.length > 0) {
+                    savedWorkout.types.forEach(type => selectedMuscleGroups.add(type));
+                    console.log('✓ Tipos restaurados desde savedWorkout.types:', Array.from(selectedMuscleGroups));
+                }
+                
+                // Respaldo: recuperar tipos de los ejercicios si no hay tipos guardados o como verificación
+                if (currentWorkout.exercises && currentWorkout.exercises.length > 0) {
+                    currentWorkout.exercises.forEach(ex => {
+                        if (ex.type && !selectedMuscleGroups.has(ex.type)) {
+                            selectedMuscleGroups.add(ex.type);
+                            console.log('✓ Tipo recuperado del ejercicio:', ex.type);
+                        }
+                    });
+                }
+
+                // Restaurar fecha en el input
+                workoutDateInput.value = savedWorkout.date;
+                
+                // Sincronizar los checkboxes del modal con los grupos restaurados
+                syncMuscleGroupCheckboxes();
+                
+                // Renderizar la interfaz
+                renderActiveWorkout();
+                
+                // Mostrar la vista correcta (entrenamiento activo, no setup)
+                navNewWorkoutBtn.classList.add('active');
+                navHistoryBtn.classList.remove('active');
+                historyView.classList.add('hidden');
+                setupView.classList.add('hidden');
+                activeWorkoutView.classList.remove('hidden');
+                
+                // Iniciar auto-guardado
+                startAutoSave();
+                
+                console.log('✓ Sesión restaurada correctamente. Ejercicios:', currentWorkout.exercises.length);
+            } catch (error) {
+                console.error("Error restaurando sesión:", error);
+                clearSessionState();
+                showCustomAlert('Advertencia', 'No se pudo recuperar la sesión anterior. Iniciando nueva sesión.').catch(e => console.log(e));
+            }
+        }
+    }
+
+    function clearSessionState() {
+        safeRemoveItem(SESSION_STORAGE_KEY);
+        safeRemoveItem(SESSION_STORAGE_KEY + '_backup');
+        stopAutoSave();
+        console.log('Sesión limpiada');
+    }
+
+    function syncMuscleGroupCheckboxes() {
+        /**
+         * Sincroniza los checkboxes del modal con los selectedMuscleGroups actuales.
+         * Esto es importante después de restaurar una sesión.
+         */
+        const checkboxes = document.querySelectorAll('#muscle-group-modal input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            const muscleGroup = checkbox.value;
+            checkbox.checked = selectedMuscleGroups.has(muscleGroup);
+        });
+        console.log('✓ Checkboxes sincronizados con grupos seleccionados:', Array.from(selectedMuscleGroups));
+    }
+    
+    function updateSelectedTypesDisplay() {
+        if (selectedMuscleGroups.size === 0) {
+            workoutTypeDisplay.textContent = '-';
+        } else {
+            const types = Array.from(selectedMuscleGroups).join(', ');
+            workoutTypeDisplay.textContent = types;
+        }
+    }
+
+    function renderActiveWorkout() {
+        // Limpiar la vista antes de renderizar
+        exercisesContainer.innerHTML = '';
+        
+        // Renderizar los datos del workout actual
+        updateSelectedTypesDisplay();
+        // Formatear fecha elegantemente: "9 MAR"
+        const [year, month, day] = currentWorkout.date.split('-');
+        const dateObj = new Date(year, month - 1, day);
+        const monthName = dateObj.toLocaleString('es-ES', { month: 'short' }).toUpperCase();
+        workoutDateDisplay.textContent = `${day} ${monthName}`;
+        
+        // Agrupar ejercicios por tipo de grupo muscular
+        const exercisesByType = {};
+        currentWorkout.exercises.forEach(exercise => {
+            const type = exercise.type || 'Sin Grupo';
+            if (!exercisesByType[type]) {
+                exercisesByType[type] = [];
+            }
+            exercisesByType[type].push(exercise);
+        });
+
+        // Asegurar que selectedMuscleGroups tiene todos los tipos de ejercicios cargados
+        // Esto es un respaldo en caso de que selectedMuscleGroups esté incompleto
+        Object.keys(exercisesByType).forEach(type => {
+            if (type !== 'Sin Grupo' && !selectedMuscleGroups.has(type)) {
+                console.log('⚠️ Tipo encontrado en ejercicios pero no en selectedMuscleGroups, añadiendo:', type);
+                selectedMuscleGroups.add(type);
+            }
+        });
+
+        // Renderizar cada grupo muscular con sus ejercicios (primero los seleccionados)
+        Array.from(selectedMuscleGroups).forEach(type => {
+            // Crear encabezado de grupo muscular
+            const groupHeaderDiv = document.createElement('div');
+            groupHeaderDiv.className = 'muscle-group-header';
+            groupHeaderDiv.innerHTML = `
+                <h3>${type}</h3>
+                <button class="delete-muscle-group-btn" data-type="${type}" title="Eliminar grupo y sus ejercicios">✕</button>
+            `;
+            exercisesContainer.appendChild(groupHeaderDiv);
+
+            // Agregar botón de eliminar grupo
+            const deleteMuscleBtn = groupHeaderDiv.querySelector('.delete-muscle-group-btn');
+            deleteMuscleBtn.addEventListener('click', () => deleteMuscleGroup(type, groupHeaderDiv));
+
+            // Renderizar ejercicios de este grupo
+            if (exercisesByType[type]) {
+                exercisesByType[type].forEach(exercise => {
+                    const exerciseElement = createExerciseElement(exercise);
+                    exercisesContainer.appendChild(exerciseElement);
+                    const setsContainer = exerciseElement.querySelector('.sets-container');
+                    exercise.sets.forEach(set => {
+                        const setElement = createSetElement(exercise, set, setsContainer);
+                        setsContainer.appendChild(setElement);
+                    });
+                    updateSetNumbers(setsContainer);
+                });
+            }
+        });
+
+        // Mostrar ejercicios sin grupo (agregados manualmente)
+        if (exercisesByType['Sin Grupo'] && exercisesByType['Sin Grupo'].length > 0) {
+            const groupHeaderDiv = document.createElement('div');
+            groupHeaderDiv.className = 'muscle-group-header';
+            groupHeaderDiv.style.borderLeftColor = '#94a3b8';
+            groupHeaderDiv.innerHTML = `<h3 style="color: #94a3b8;">Otros Ejercicios</h3>`;
+            exercisesContainer.appendChild(groupHeaderDiv);
+
+            exercisesByType['Sin Grupo'].forEach(exercise => {
+                const exerciseElement = createExerciseElement(exercise);
+                exercisesContainer.appendChild(exerciseElement);
+                const setsContainer = exerciseElement.querySelector('.sets-container');
+                exercise.sets.forEach(set => {
+                    const setElement = createSetElement(exercise, set, setsContainer);
+                    setsContainer.appendChild(setElement);
+                });
+                updateSetNumbers(setsContainer);
+            });
+        }
+
+        // Mostrar la vista de entrenamiento activo
+        // Solo si estamos en la pestaña de workout
+        if (navNewWorkoutBtn.classList.contains('active')) {
+            setupView.classList.add('hidden');
+            activeWorkoutView.classList.remove('hidden');
+        }
+        
+        console.log('✓ Entrenamiento renderizado. Grupos:', Array.from(selectedMuscleGroups), 'Ejercicios totales:', currentWorkout.exercises.length);
+    }
+
+    // --- LÓGICA DE NAVEGACIÓN ---
+    function switchTab(tabName) {
+        if (tabName === 'workout') {
+            navNewWorkoutBtn.classList.add('active');
+            navHistoryBtn.classList.remove('active');
+            historyView.classList.add('hidden');
+            
+            if (currentWorkout) {
+                activeWorkoutView.classList.remove('hidden');
+                setupView.classList.add('hidden');
+            } else {
+                setupView.classList.remove('hidden');
+                activeWorkoutView.classList.add('hidden');
+            }
+        } else if (tabName === 'history') {
+            navHistoryBtn.classList.add('active');
+            navNewWorkoutBtn.classList.remove('active');
+            setupView.classList.add('hidden');
+            activeWorkoutView.classList.add('hidden');
+            historyView.classList.remove('hidden');
+            loadFullHistory();
+        }
+    }
+
+    // --- LÓGICA DE WORKOUT ---
+    async function startWorkout() {
+        const date = workoutDateInput.value;
+
+        if (!date) {
+            await showCustomAlert('Falta información', 'Por favor, selecciona una fecha.');
+            return;
+        }
+        
+        startWorkoutBtn.disabled = true;
+        startWorkoutBtn.textContent = 'Cargando...';
+
+        try {
+            currentWorkout = { date, exercises: [] };
+            selectedMuscleGroups.clear();
+            // Limpiar checkboxes
+            document.querySelectorAll('#muscle-group-modal input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateSelectedTypesDisplay();
+            
+            // Guardar estado inicial
+            saveStateToSession();
+            
+            // Iniciar auto-guardado
+            startAutoSave();
+            
+            renderActiveWorkout();
+        } catch (error) {
+            console.error("Error al iniciar entreno:", error);
+            await showCustomAlert("Error", "No se pudo iniciar el entrenamiento.");
+        } finally {
+            startWorkoutBtn.disabled = false;
+            startWorkoutBtn.textContent = 'Comenzar Entrenamiento';
+        }
+    }
+
+    async function loadExercisesForSelectedGroups() {
+    // Obtener todos los checkboxes marcados
+    const checkedCheckboxes = Array.from(
+        document.querySelectorAll('#muscle-group-modal input[type="checkbox"]:checked')
+    );
+
+    if (checkedCheckboxes.length === 0) {
+        await showCustomAlert('Selecciona un grupo', 'Por favor, selecciona al menos un grupo muscular.');
+        return;
+    }
+
+    if (!currentWorkout) {
+        await showCustomAlert('Error', 'No hay entrenamiento activo.');
+        return;
+    }
+
+    loadExercisesBtn.disabled = true;
+    loadExercisesBtn.textContent = 'Cargando...';
+
+    try {
+        // Recolectar grupos a procesar
+        const groupsToProcess = [];
+        let anyNewGroup = false;
+
+        for (const checkbox of checkedCheckboxes) {
+            const type = checkbox.value.trim();
+
+            if (selectedMuscleGroups.has(type)) {
+                groupsToProcess.push({ type, alreadyExists: true });
+            } else {
+                groupsToProcess.push({ type, alreadyExists: false });
+                anyNewGroup = true;
+            }
+        }
+
+        // Caso especial: todos los grupos ya estaban seleccionados
+        if (!anyNewGroup) {
+            await showCustomAlert(
+                'Grupos ya cargados',
+                'Los grupos musculares seleccionados ya están activos.\nLos ejercicios recientes ya aparecen en la lista.'
+            );
+            checkedCheckboxes.forEach(cb => (cb.checked = false));
+            muscleGroupModal.classList.add('hidden');
+            return;
+        }
+
+        let exercisesAdded = 0;
+
+        // Procesar solo los grupos nuevos
+        for (const { type, alreadyExists } of groupsToProcess) {
+            if (alreadyExists) continue;
+
+            try {
+                const response = await fetch(`/api/latest_exercises/${encodeURIComponent(type)}`);
+                if (!response.ok) {
+                    console.warn(`No se pudieron cargar ejercicios para ${type}: ${response.status}`);
+                    continue;
+                }
+
+                const latestExercises = await response.json();
+
+                if (!Array.isArray(latestExercises) || latestExercises.length === 0) {
+                    continue;
+                }
+
+                latestExercises.forEach(ex => {
+                    // Validación básica del ejercicio recibido
+                    if (!ex?.name || typeof ex.name !== 'string' || ex.name.trim() === '') {
+                        return;
+                    }
+
+                    const nameNormalized = ex.name.trim().toLowerCase();
+
+                    // Comprobación robusta de duplicado
+                    const alreadyInWorkout = currentWorkout.exercises.some(e => {
+                        const existingName = (e.name || '').trim().toLowerCase();
+                        return existingName === nameNormalized;
+                    });
+
+                    if (!alreadyInWorkout) {
+                        currentWorkout.exercises.push({
+                            name: ex.name.trim(),
+                            type: type,
+                            sets: Array.isArray(ex.sets) ? ex.sets.map(s => ({ ...s })) : [], // copia profunda simple
+                            collapsed: true // iniciar minimizado para no saturar la vista
+                        });
+                        exercisesAdded++;
+                    }
+                });
+
+                // Añadimos el grupo a los seleccionados
+                selectedMuscleGroups.add(type);
+
+            } catch (err) {
+                console.error(`Error al cargar ejercicios de ${type}:`, err);
+                // Continuamos con los siguientes grupos aunque falle uno
+            }
+        }
+
+        // Feedback final según resultado
+        if (exercisesAdded > 0) {
+            await showCustomAlert(
+                'Ejercicios añadidos',
+                `Se han cargado ${exercisesAdded} ejercicio${exercisesAdded === 1 ? '' : 's'} recientes.`
+            );
+        } else {
+            await showCustomAlert(
+                'Sin novedades',
+                'No se encontraron ejercicios nuevos para añadir en los grupos seleccionados.'
+            );
+        }
+
+        // Actualizar UI
+        checkedCheckboxes.forEach(cb => (cb.checked = false));
+        muscleGroupModal.classList.add('hidden');
+
+        if (typeof updateSelectedTypesDisplay === 'function') {
+            updateSelectedTypesDisplay();
+        }
+        if (typeof renderActiveWorkout === 'function') {
+            renderActiveWorkout();
+        }
+
+        saveStateToSession();
+
+    } catch (error) {
+        console.error("Error general al cargar ejercicios:", error);
+        await showCustomAlert("Error", "Hubo un problema al cargar los ejercicios. Inténtalo de nuevo.");
+    } finally {
+        loadExercisesBtn.disabled = false;
+        loadExercisesBtn.textContent = 'Cargar Ejercicios Seleccionados';
+    }
+}
+
+    async function deleteMuscleGroup(type, headerElement) {
+        const confirmDel = await showCustomConfirm("Eliminar grupo muscular", `¿Eliminar "${type}" y todos sus ejercicios?`);
+        if (!confirmDel) return;
+
+        // Eliminar todos los ejercicios de este tipo
+        currentWorkout.exercises = currentWorkout.exercises.filter(ex => ex.type !== type);
+        
+        // Eliminar el grupo de los seleccionados
+        selectedMuscleGroups.delete(type);
+        
+        // Renderizar de nuevo
+        renderActiveWorkout();
+        saveStateToSession();
+    }
+
+    async function finishWorkout() {
+        if (currentWorkout.exercises.length === 0) {
+            const confirmFinish = await showCustomConfirm("Entrenamiento vacío", "No has añadido ejercicios. ¿Finalizar de todos modos?");
+            if (!confirmFinish) {
+                return;
+            }
+        }
+
+        finishWorkoutBtn.disabled = true;
+        finishWorkoutBtn.textContent = 'Guardando...';
+
+        try {
+            // Agregar los tipos seleccionados al workout
+            currentWorkout.types = Array.from(selectedMuscleGroups);
+            
+            // Guardar una última vez antes de enviar
+            saveStateToSession();
+            
+            const response = await fetch('/api/save_workout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentWorkout)
+            });
+            if (isIOS) await deleteDraftFromServer();
+            if (!response.ok) throw new Error('El servidor falló al guardar.');
+
+            await showCustomAlert('¡Éxito!', 'Entrenamiento guardado correctamente.');
+            
+            // Detener auto-guardado y limpiar sesión
+            stopAutoSave();
+            clearSessionState();
+            resetApp();
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            await showCustomAlert('Error', 'Hubo un error al guardar el entrenamiento.');
+        } finally {
+            finishWorkoutBtn.disabled = false;
+            finishWorkoutBtn.textContent = 'Finalizar y Guardar';
+        }
+    }
+
+    async function cancelWorkout() {
+        const confirmCancel = await showCustomConfirm("¿Cancelar?", "¿Seguro que quieres salir? Se perderá el progreso no guardado.");
+        if(confirmCancel) {
+            stopAutoSave();
+            clearSessionState();
+            if (isIOS) await deleteDraftFromServer();
+            resetApp();
+        }
+    }
+    
+    function resetApp() {
+        currentWorkout = null;
+        exercisesContainer.innerHTML = '';
+        exerciseNameInput.value = '';
+        activeWorkoutView.classList.add('hidden');
+        setupView.classList.remove('hidden');
+    }
+
+    // --- LÓGICA DE HISTORIAL ---
+    async function showHistory() {
+        const types = Array.from(selectedMuscleGroups).join(', ') || 'Sin grupo';
+        historyMuscleGroup.textContent = types;
+        historyContainer.innerHTML = 'Cargando...';
+        historyModal.classList.remove('hidden');
+
+        try {
+            // Mostrar último entrenamiento guardado
+            const response = await fetch('/api/history');
+            const history = await response.json();
+            const filteredHistory = history.filter(h => {
+                const hTypes = h.types || [h.type];
+                return Array.from(selectedMuscleGroups).some(t => hTypes.includes(t));
+            });
+            renderHistoryList(filteredHistory, historyContainer);
+        } catch (error) {
+            console.error("Error al cargar historial:", error);
+            historyContainer.innerHTML = '<p>No se pudo cargar el historial.</p>';
+        }
+    }
+
+    async function loadFullHistory() {
+        const type = historyFilterType.value;
+        const date = historyFilterDate.value;
+        
+        fullHistoryContainer.innerHTML = 'Cargando...';
+        
+        let url = `/api/history?type=${type}`;
+        if (date) url += `&date=${date}`;
+
+        try {
+            const response = await fetch(url);
+            const history = await response.json();
+            renderHistoryList(history, fullHistoryContainer);
+            attachEvolutionButtons();
+        } catch (error) {
+            console.error("Error al cargar historial completo:", error);
+            fullHistoryContainer.innerHTML = '<p>Error al cargar datos.</p>';
+        }
+    }
+
+    function clearFilters() {
+        historyFilterType.value = 'Todos';
+        historyFilterDate.value = '';
+        loadFullHistory();
+    }
+
+    async function deleteWorkout(workoutId) {
+        const confirmDelete = await showCustomConfirm("Eliminar", "¿Seguro que quieres eliminar este entrenamiento permanentemente?");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`/api/delete_workout/${workoutId}`, { method: 'DELETE' });
+            if (response.ok) {
+                // Recargar el historial actual
+                if (!historyView.classList.contains('hidden')) loadFullHistory();
+                else showHistory(); // Si estamos en el modal
+            } else {
+                await showCustomAlert("Error", "No se pudo eliminar el entrenamiento.");
+            }
+        } catch (error) {
+            console.error("Error eliminando:", error);
+        }
+    }
+
+    function renderHistoryList(history, container) {
+        if (!history.length) {
+            container.innerHTML = '<div class="empty-state"><p>No se encontraron entrenamientos.</p></div>';
+            return;
+        }
+        container.innerHTML = '';
+        
+        history.forEach(session => {
+            // Formatear fecha
+            const [yearStr, monthStr, dayStr] = session.date.split('-');
+            const dateObj = new Date(yearStr, monthStr - 1, dayStr);
+            const day = dayStr;
+            const month = dateObj.toLocaleString('es-ES', { month: 'short' }).toUpperCase().replace('.', '');
+            
+            // Contar ejercicios
+            const exerciseCount = session.exercises ? session.exercises.length : 0;
+            const exerciseText = exerciseCount === 1 ? 'Ejercicio' : 'Ejercicios';
+
+            const sessionDiv = document.createElement('div');
+            sessionDiv.className = 'history-card';
+            
+            // Obtener tipos (compatible con legado 'type' y nuevo 'types')
+            const sessionTypes = session.types || (session.type ? [session.type] : []);
+            const sessionTypeDisplay = sessionTypes.join(', ') || 'Sin grupo';
+            const primaryType = sessionTypes[0] || session.type || '';
+            
+            // Generar HTML de ejercicios
+            const exercisesListHtml = session.exercises.map(ex => {
+                const setsHtml = ex.sets.map(s => 
+                    `<span class="set-tag">${s.reps} x ${s.weight}kg</span>`
+                ).join('');
+                return `
+                    <div class="history-exercise-item">
+                        <h4>${ex.name} <button class="evolution-btn" data-exercise="${encodeURIComponent(ex.name)}" data-type="${primaryType}" style="margin-left:8px;padding:4px 6px;font-size:0.8em">Evolución</button></h4>
+                        <div class="history-sets">${setsHtml}</div>
+                    </div>`;
+            }).join('');
+
+            // Construir el HTML interno
+            const innerHTML = `
+                <div class="history-header">
+                    <div class="history-date-badge">
+                        <span class="date-day">${day}</span>
+                        <span class="date-month">${month}</span>
+                    </div>
+                    <div class="history-meta">
+                        <h3>${sessionTypeDisplay}</h3>
+                        <span class="meta-count">${exerciseCount} ${exerciseText}</span>
+                    </div>
+                    <button class="delete-workout-btn" title="Eliminar entrenamiento">
+                        &times;
+                    </button>
+                </div>
+                <div class="history-body">
+                    ${exercisesListHtml || '<p class="text-muted">Sin ejercicios</p>'}
+                </div>
+            `;
+            
+            sessionDiv.innerHTML = innerHTML;
+            
+            // Añadir evento al botón de eliminar
+            const deleteBtn = sessionDiv.querySelector('.delete-workout-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evitar que el click se propague si hacemos las cards clickeables
+                deleteWorkout(session.id);
+            });
+
+            container.appendChild(sessionDiv);
+        });
+        // attach evolution buttons for modal
+        attachEvolutionButtons();
+    }
+
+    // Chart modal logic
+    const chartModal = document.getElementById('chart-modal');
+    const closeChartBtn = document.getElementById('close-chart-btn');
+    const chartTitle = document.getElementById('chart-title');
+    const chartCanvas = document.getElementById('chart-canvas');
+    let currentChart = null;
+
+    if (closeChartBtn) closeChartBtn.addEventListener('click', () => {
+        if (chartModal) chartModal.classList.add('hidden');
+        if (currentChart) { currentChart.destroy(); currentChart = null; }
+    });
+
+    // Cerrar chart modal al hacer click fuera (compatible con iOS)
+    if (chartModal) {
+        chartModal.addEventListener('click', (event) => {
+            if (event.target === chartModal) {
+                chartModal.classList.add('hidden');
+                if (currentChart) { currentChart.destroy(); currentChart = null; }
+            }
+        });
+    }
+
+    function attachEvolutionButtons() {
+        const buttons = document.querySelectorAll('.evolution-btn');
+        buttons.forEach(btn => {
+            if (btn._bound) return; // avoid double-binding
+            btn._bound = true;
+            btn.addEventListener('click', (e) => {
+                const exName = decodeURIComponent(btn.getAttribute('data-exercise'));
+                const type = btn.getAttribute('data-type') || historyFilterType.value;
+                openExerciseChart(exName, type);
+            });
+        });
+    }
+
+    async function openExerciseChart(exName, type) {
+        // Build URL respecting 'Todos'
+        let url = '/api/history';
+        if (type && type !== 'Todos') url += `?type=${encodeURIComponent(type)}`;
+        try {
+            const response = await fetch(url);
+            const history = await response.json();
+
+            // Aggregate per session date
+            const points = [];
+            history.forEach(session => {
+                const ex = (session.exercises || []).find(e => e.name === exName);
+                if (ex) {
+                    const date = session.date;
+                    const sets = ex.sets || [];
+                    if (sets.length === 0) return;
+                    // compute average weight and total reps
+                    const totalReps = sets.reduce((s, it) => s + (it.reps || 0), 0);
+                    const avgWeight = sets.reduce((s, it) => s + (it.weight || 0), 0) / sets.length;
+                    points.push({ date, totalReps, avgWeight });
+                }
+            });
+
+            // sort by date
+            points.sort((a,b) => a.date.localeCompare(b.date));
+
+            const labels = points.map(p => p.date);
+            const repsData = points.map(p => p.totalReps);
+            const weightData = points.map(p => Number(p.avgWeight.toFixed(2)));
+
+            // show modal
+            chartTitle.textContent = `Evolución: ${exName}`;
+            if (chartModal) chartModal.classList.remove('hidden');
+
+            // create chart
+            if (currentChart) currentChart.destroy();
+            const ctx = chartCanvas.getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Peso medio (kg)',
+                            data: weightData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.2)',
+                            yAxisID: 'y-weight',
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Repeticiones totales',
+                            data: repsData,
+                            backgroundColor: 'rgba(16,185,129,0.6)',
+                            yAxisID: 'y-reps',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        'y-weight': { type: 'linear', position: 'left', title: { display: true, text: 'Peso (kg)' } },
+                        'y-reps': { type: 'linear', position: 'right', title: { display: true, text: 'Reps' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+        } catch (err) {
+            console.error('Error generating chart', err);
+            await showCustomAlert('Error', 'No se pudo generar la gráfica.');
+        }
+    }
+
+    // --- LÓGICA DE EJERCICIOS ---
+    async function addExercise() {
+        const exerciseName = exerciseNameInput.value.trim();
+        if (exerciseName === '') return;
+
+        const exercise = { name: exerciseName, sets: [] };
+        currentWorkout.exercises.push(exercise);
+        const exerciseElement = createExerciseElement(exercise);
+        exercisesContainer.appendChild(exerciseElement);
+        exerciseNameInput.value = '';
+        exerciseNameInput.focus();
+        saveStateToSession();
+    }
+    
+    async function deleteExercise(exercise, exerciseElement) {
+        const confirmDel = await showCustomConfirm("Eliminar Ejercicio", `¿Eliminar "${exercise.name}"?`);
+        if (!confirmDel) return;
+        
+        const index = currentWorkout.exercises.indexOf(exercise);
+        if (index > -1) currentWorkout.exercises.splice(index, 1);
+        exerciseElement.remove();
+        saveStateToSession();
+    }
+
+    // --- LÓGICA DE SERIES ---
+    function addSet(exercise, setsContainer) {
+        const set = { reps: null, weight: null };
+        exercise.sets.push(set);
+        const setElement = createSetElement(exercise, set, setsContainer);
+        setsContainer.appendChild(setElement);
+        updateSetNumbers(setsContainer);
+        saveStateToSession();
+    }
+
+    function deleteSet(exercise, set, setElement, setsContainer) {
+        const index = exercise.sets.indexOf(set);
+        if (index > -1) exercise.sets.splice(index, 1);
+        setElement.remove();
+        updateSetNumbers(setsContainer);
+        saveStateToSession();
+    }
+
+    // --- CREACIÓN DE ELEMENTOS DEL DOM ---
+    function createExerciseElement(exercise) {
+        const exerciseElement = exerciseTemplate.content.cloneNode(true).firstElementChild;
+        const title = exerciseElement.querySelector('.exercise-title');
+        const deleteBtn = exerciseElement.querySelector('.delete-exercise-btn');
+        const toggleBtn = exerciseElement.querySelector('.toggle-exercise-btn');
+        const setsContainer = exerciseElement.querySelector('.sets-container');
+        const addSetBtn = exerciseElement.querySelector('.add-set-btn');
+
+        title.textContent = exercise.name;
+        deleteBtn.addEventListener('click', () => deleteExercise(exercise, exerciseElement));
+        addSetBtn.addEventListener('click', () => addSet(exercise, setsContainer));
+
+        // Aplicar estado inicial de colapso
+        if (exercise.collapsed) {
+            exerciseElement.classList.add('collapsed');
+        }
+
+        // Toggle collapse of exercise details
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                exerciseElement.classList.toggle('collapsed');
+                exercise.collapsed = exerciseElement.classList.contains('collapsed');
+                saveStateToSession();
+            });
+        }
+
+        return exerciseElement;
+    }
+
+    function createSetElement(exercise, set, setsContainer) {
+        const setElement = setTemplate.content.cloneNode(true).firstElementChild;
+        const repsInput = setElement.querySelector('.reps-input');
+        const weightInput = setElement.querySelector('.weight-input');
+        const confirmBtn = setElement.querySelector('.confirm-set-btn');
+        const deleteBtn = setElement.querySelector('.delete-set-btn');
+
+        // Mostrar valor sólo si existe (no forzar 0 por defecto)
+        repsInput.value = (set.reps !== null && set.reps !== undefined && set.reps !== '') ? set.reps : '';
+        weightInput.value = (set.weight !== null && set.weight !== undefined && set.weight !== '') ? set.weight : '';
+
+        const updateSetData = () => {
+            // Guardar null si el campo está vacío, mantener número si existe
+            const r = repsInput.value.trim();
+            const w = weightInput.value.trim();
+            set.reps = r === '' ? null : parseInt(r, 10);
+            set.weight = w === '' ? null : parseFloat(w);
+            saveStateToSession();
+        };
+
+        repsInput.addEventListener('input', updateSetData);
+        weightInput.addEventListener('input', updateSetData);
+
+        confirmBtn.addEventListener('click', () => {
+            setElement.classList.toggle('completed');
+        });
+        
+        deleteBtn.addEventListener('click', () => deleteSet(exercise, set, setElement, setsContainer));
+
+        return setElement;
+    }
+    
+    function updateSetNumbers(setsContainer) {
+        const setRows = setsContainer.querySelectorAll('.set-row');
+        setRows.forEach((row, index) => {
+            row.querySelector('.set-number').textContent = `Serie ${index + 1}`;
+        });
+    }
+
+    initialize();Q
+});
+
+async function saveWorkoutDraftToServer() {
+    if (!currentWorkout) return;
+    try {
+        // Preparar data con bandera
+        const draftData = {
+            ...currentWorkout,
+            types: Array.from(selectedMuscleGroups),
+            isDraft: true,
+            savedAt: new Date().toISOString()
+        };
+        const response = await fetch('/api/save_draft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(draftData)
+        });
+        if (response.ok) {
+            console.log('✓ Borrador guardado en servidor (iOS)');
+        } else {
+            console.error('Error guardando borrador en servidor');
+        }
+    } catch (error) {
+        console.error('Error en saveWorkoutDraftToServer:', error);
+    }
+}
+
+async function loadDraftFromServer() {
+    try {
+        const response = await fetch('/api/get_draft');
+        const data = await response.json();
+        if (data) {
+            console.log('✓ Borrador cargado desde servidor (iOS)', data);
+            return data;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error cargando borrador:', error);
+        return null;
+    }
+}
+
+async function deleteDraftFromServer() {
+    try {
+        const response = await fetch('/api/delete_draft', { method: 'DELETE' });
+        if (response.ok) {
+            console.log('✓ Borrador eliminado del servidor (iOS)');
+        }
+    } catch (error) {
+        console.error('Error eliminando borrador:', error);
+    }
+}
+
+function startServerSave() {
+    if (serverSaveInterval) clearInterval(serverSaveInterval);
+    serverSaveInterval = setInterval(() => {
+        if (currentWorkout) saveWorkoutDraftToServer();
+    }, 10000); // Cada 10 segundos, ajusta si es necesario
+    console.log('Auto-guardado en servidor activado para iOS (cada 10s)');
+}
+Modifica checkForActiveSession (agrega al inicio, después de const saved = safeGetItem(SESSION_STORAGE_KEY);):
+JavaScriptasync function checkForActiveSession() {
+    let savedWorkout = null;
+    const saved = safeGetItem(SESSION_STORAGE_KEY);
+    if (saved) {
+        try {
+            savedWorkout = JSON.parse(saved);
+        } catch (e) {
+            console.error('Error parseando sesión guardada:', e);
+        }
+    }
+
+    // Para iOS, si no hay local, intentar cargar draft del servidor
+    if (!savedWorkout && isIOS) {
+        const draft = await loadDraftFromServer();
+        if (draft) {
+            savedWorkout = draft;
+            // Eliminar campos de draft
+            delete savedWorkout.isDraft;
+            delete savedWorkout.savedAt;
+        }
+    }
+
+    if (savedWorkout) {
+        currentWorkout = savedWorkout;
+        selectedMuscleGroups = new Set(savedWorkout.types || []);
+        workoutDateDisplay.textContent = savedWorkout.date;
+        workoutTypeDisplay.textContent = Array.from(selectedMuscleGroups).join(', ') || 'Sin grupo';
+        switchToActiveView();
+        renderExercises();
+        startAutoSave();
+        if (isIOS) startServerSave();
+
+        // Si no hay tipos, mostrar modal automáticamente
+        if (selectedMuscleGroups.size === 0) {
+            muscleGroupModal.classList.remove('hidden');
+            await showCustomAlert('Recuperando Sesión', 'Selecciona los grupos musculares para continuar.');
+        }
+    }
+}

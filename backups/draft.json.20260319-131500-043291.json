@@ -1,0 +1,116 @@
+{
+    "users": {
+        "prueba": {
+            "date": "2026-03-10",
+            "types": [
+                "Pecho"
+            ],
+            "exercises": [],
+            "isDraft": true,
+            "savedAt": "2026-03-11T00:46:44.029908"
+        },
+        "saraposadaas": {
+            "date": "2026-03-12",
+            "types": [
+                "Pecho"
+            ],
+            "exercises": [],
+            "isDraft": true,
+            "savedAt": "2026-03-12T16:26:43.545979"
+        },
+        "andrius": {
+            "date": "2026-03-19",
+            "types": [
+                "Abdominales"
+            ],
+            "exercises": [
+                {
+                    "name": "Piernas arriba",
+                    "type": "Abdominales",
+                    "sets": [
+                        {
+                            "reps": 20,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": true
+                        },
+                        {
+                            "reps": 17,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": 15,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": 12,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": true
+                        },
+                        {
+                            "reps": null,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        }
+                    ],
+                    "collapsed": false
+                },
+                {
+                    "name": "Máquina",
+                    "type": "Abdominales",
+                    "sets": [
+                        {
+                            "reps": 11,
+                            "weight": 5,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": 10,
+                            "weight": 5,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": 10,
+                            "weight": 5,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": 10,
+                            "weight": 5,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        },
+                        {
+                            "reps": null,
+                            "weight": null,
+                            "durationSeconds": null,
+                            "avgSpeed": null,
+                            "completed": false
+                        }
+                    ],
+                    "collapsed": true
+                }
+            ],
+            "isDraft": true,
+            "savedAt": "2026-03-19T13:14:28.651305"
+        }
+    }
+}
