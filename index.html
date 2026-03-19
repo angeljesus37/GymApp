@@ -500,6 +500,78 @@
         </div>
     </template>
 
+    <script>
+        (function () {
+            const authUserKey = 'app-entrenamiento-auth-user';
+            const activeTabKeyPrefix = 'app-entrenamiento-active-tab';
+
+            try {
+                const username = window.localStorage.getItem(authUserKey);
+                const authView = document.getElementById('auth-view');
+                const appShell = document.getElementById('app-shell');
+                const userSessionBar = document.getElementById('user-session-bar');
+
+                if (!username) {
+                    if (authView) {
+                        authView.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                const activeTab = window.localStorage.getItem(activeTabKeyPrefix + '-' + username) || 'workout';
+                window.__TRAINING_APP_BOOT__ = { username, activeTab };
+
+                document.body.classList.add('is-boot-restoring');
+                authView?.classList.add('hidden');
+                appShell?.classList.remove('hidden');
+                userSessionBar?.classList.remove('hidden');
+
+                const currentUserDisplay = document.getElementById('current-user-display');
+                const currentUserName = document.getElementById('current-user-name');
+                const normalizedUser = String(username).trim();
+                if (currentUserDisplay) {
+                    currentUserDisplay.textContent = normalizedUser.charAt(0).toUpperCase();
+                }
+                if (currentUserName) {
+                    currentUserName.textContent = normalizedUser.charAt(0).toUpperCase() + normalizedUser.slice(1);
+                }
+
+                const views = {
+                    workout: [document.getElementById('setup-view'), document.getElementById('active-workout-view')],
+                    history: [document.getElementById('history-view')],
+                    progress: [document.getElementById('progress-view')],
+                    nutrition: [document.getElementById('nutrition-view')]
+                };
+
+                document.querySelectorAll('#main-nav .nav-btn').forEach((button) => {
+                    button.classList.toggle('active', button.dataset.tab === activeTab);
+                });
+
+                document.getElementById('setup-view')?.classList.add('hidden');
+                document.getElementById('active-workout-view')?.classList.add('hidden');
+                document.getElementById('history-view')?.classList.add('hidden');
+                document.getElementById('progress-view')?.classList.add('hidden');
+                document.getElementById('nutrition-view')?.classList.add('hidden');
+
+                const bootViews = views[activeTab] || views.workout;
+                bootViews.forEach((view, index) => {
+                    if (!view) {
+                        return;
+                    }
+
+                    if (activeTab === 'workout') {
+                        view.classList.toggle('hidden', index !== 0);
+                        return;
+                    }
+
+                    view.classList.remove('hidden');
+                });
+            } catch (error) {
+                const authView = document.getElementById('auth-view');
+                authView?.classList.remove('hidden');
+            }
+        }());
+    </script>
     <script type="module" src="script.js"></script>
 </body>
 </html>

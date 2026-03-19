@@ -9,6 +9,7 @@ import { createWorkoutController } from './ui/workout.js';
 
 const STORAGE_KEY_PREFIX = 'app-entrenamiento-active-workout';
 const ACTIVE_TAB_KEY_PREFIX = 'app-entrenamiento-active-tab';
+const AUTH_USER_KEY = 'app-entrenamiento-auth-user';
 const LOCAL_SAVE_INTERVAL = 3000;
 const SERVER_SAVE_INTERVAL = 30000;
 
@@ -126,6 +127,7 @@ function getElements() {
 export function initApp() {
     const elements = getElements();
     const state = createAppState();
+    const bootState = window.__TRAINING_APP_BOOT__ || null;
     const today = new Date().toISOString().split('T')[0];
     const navTabs = [
         { name: 'workout', button: elements.navNewWorkoutBtn },
@@ -209,6 +211,22 @@ export function initApp() {
         }
 
         return `${STORAGE_KEY_PREFIX}-${state.currentUser}`;
+    }
+
+    function persistAuthenticatedUser(username) {
+        try {
+            window.localStorage.setItem(AUTH_USER_KEY, username);
+        } catch (error) {
+            state.inMemoryStorage[AUTH_USER_KEY] = username;
+        }
+    }
+
+    function clearPersistedAuthenticatedUser() {
+        try {
+            window.localStorage.removeItem(AUTH_USER_KEY);
+        } catch (error) {
+            delete state.inMemoryStorage[AUTH_USER_KEY];
+        }
     }
 
     function getActiveTabStorageKey() {
@@ -417,6 +435,7 @@ export function initApp() {
     }
 
     function showAuthView(statusText = '', tone = 'muted') {
+        document.body.classList.remove('is-boot-restoring');
         elements.authView.classList.remove('hidden');
         elements.appShell.classList.add('hidden');
         elements.userSessionBar.classList.add('hidden');
@@ -429,6 +448,7 @@ export function initApp() {
     }
 
     function showAppShell() {
+        document.body.classList.remove('is-boot-restoring');
         elements.authView.classList.add('hidden');
         elements.appShell.classList.remove('hidden');
         elements.userSessionBar.classList.remove('hidden');
@@ -573,6 +593,7 @@ export function initApp() {
                 : await api.login(username, password);
 
             state.currentUser = response.username;
+            persistAuthenticatedUser(response.username);
             elements.loginPasswordInput.value = '';
             await restoreAuthenticatedWorkspace();
         } catch (error) {
@@ -590,6 +611,7 @@ export function initApp() {
 
         persistence.stopAutoSave();
         state.currentUser = null;
+        clearPersistedAuthenticatedUser();
 
         try {
             await api.logout();
@@ -604,11 +626,13 @@ export function initApp() {
         try {
             const sessionData = await api.getSession();
             if (!sessionData.authenticated) {
+                clearPersistedAuthenticatedUser();
                 showAuthView();
                 return;
             }
 
             state.currentUser = sessionData.username;
+            persistAuthenticatedUser(sessionData.username);
             await restoreAuthenticatedWorkspace();
         } catch (error) {
             console.error('Error restaurando sesión:', error);
@@ -674,6 +698,11 @@ export function initApp() {
     });
 
     window.addEventListener('resize', () => updateNavHighlight());
+
+    if (bootState?.username) {
+        state.currentUser = bootState.username;
+        state.activeTab = bootState.activeTab || state.activeTab;
+    }
 
     setPasswordVisibility(false);
     requestAnimationFrame(() => updateNavHighlight());
