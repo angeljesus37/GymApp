@@ -8,6 +8,7 @@ import { createProgressController } from './ui/progress.js';
 import { createWorkoutController } from './ui/workout.js';
 
 const STORAGE_KEY_PREFIX = 'app-entrenamiento-active-workout';
+const ACTIVE_TAB_KEY_PREFIX = 'app-entrenamiento-active-tab';
 const LOCAL_SAVE_INTERVAL = 3000;
 const SERVER_SAVE_INTERVAL = 30000;
 
@@ -210,6 +211,45 @@ export function initApp() {
         return `${STORAGE_KEY_PREFIX}-${state.currentUser}`;
     }
 
+    function getActiveTabStorageKey() {
+        if (!state.currentUser) {
+            return null;
+        }
+
+        return `${ACTIVE_TAB_KEY_PREFIX}-${state.currentUser}`;
+    }
+
+    function persistActiveTab(tabName) {
+        const storageKey = getActiveTabStorageKey();
+        if (!storageKey) {
+            return;
+        }
+
+        try {
+            window.localStorage.setItem(storageKey, tabName);
+        } catch (error) {
+            state.inMemoryStorage[storageKey] = tabName;
+        }
+    }
+
+    function restoreActiveTab() {
+        const storageKey = getActiveTabStorageKey();
+        if (!storageKey) {
+            return 'workout';
+        }
+
+        try {
+            const restored = window.localStorage.getItem(storageKey);
+            if (restored) {
+                return restored;
+            }
+        } catch (error) {
+            // Ignore storage read failures and fall back to memory/default.
+        }
+
+        return state.inMemoryStorage[storageKey] || 'workout';
+    }
+
     function updateNavHighlight(targetButton = null) {
         const nav = elements.mainNav;
         const activeButton = targetButton || nav?.querySelector('.nav-btn.active');
@@ -388,18 +428,6 @@ export function initApp() {
         setAuthStatusText(statusText, tone);
     }
 
-    function showAuthLoading(statusText = 'Restaurando sesión...') {
-        elements.authView.classList.remove('hidden');
-        elements.appShell.classList.add('hidden');
-        elements.userSessionBar.classList.add('hidden');
-        elements.currentUserDisplay.textContent = '';
-        elements.currentUserName.textContent = '';
-        closeUserMenu();
-        resetWorkoutState();
-        setAuthLoading(true);
-        setAuthStatusText(statusText, 'muted');
-    }
-
     function showAppShell() {
         elements.authView.classList.add('hidden');
         elements.appShell.classList.remove('hidden');
@@ -415,6 +443,9 @@ export function initApp() {
         if (!state.currentUser) {
             return;
         }
+
+        state.activeTab = tabName;
+        persistActiveTab(tabName);
 
         const showWorkout = tabName === 'workout';
         const showHistory = tabName === 'history';
@@ -506,6 +537,7 @@ export function initApp() {
 
         const restoredWorkout = await persistence.restoreSession();
         if (!restoredWorkout) {
+            switchTab(restoreActiveTab());
             return;
         }
 
@@ -521,6 +553,7 @@ export function initApp() {
         persistence.startAutoSave();
         state.draftDirty = false;
         setSaveStatusText('', 'success');
+        switchTab(restoreActiveTab());
     }
 
     async function authenticate(action) {
@@ -569,7 +602,6 @@ export function initApp() {
 
     async function restoreAuthSession() {
         try {
-            showAuthLoading();
             const sessionData = await api.getSession();
             if (!sessionData.authenticated) {
                 showAuthView();

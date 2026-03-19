@@ -2,6 +2,7 @@ export function createAppState() {
     return {
         currentUser: null,
         currentWorkout: null,
+        activeTab: 'workout',
         selectedMuscleGroups: new Set(),
         collapsedWorkoutGroups: new Set(),
         currentChart: null,
