@@ -526,7 +526,9 @@ export function createHistoryController({ elements, state, api, dialogs }) {
         }
 
         try {
-            await api.deleteWorkout(workoutId);
+            await dialogs.withLoading('Eliminando entrenamiento...', async () => {
+                await api.deleteWorkout(workoutId);
+            });
             collapsedHistoryCards.delete(workoutId);
             if (elements.historyView.classList.contains('hidden')) {
                 await showHistory();

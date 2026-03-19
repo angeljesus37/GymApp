@@ -153,7 +153,9 @@ export function createNutritionController({ elements, api, dialogs }) {
                 }
 
                 try {
-                    await api.deleteNutritionEntry(entryId);
+                    await dialogs.withLoading('Eliminando alimento...', async () => {
+                        await api.deleteNutritionEntry(entryId);
+                    });
                     await loadNutrition();
                 } catch (error) {
                     console.error('Error eliminando alimento:', error);

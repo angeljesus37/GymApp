@@ -717,8 +717,10 @@ export function createWorkoutController({
         elements.finishWorkoutBtn.textContent = 'Guardando...';
 
         try {
-            await api.saveWorkout(payload);
-            await api.deleteDraft();
+            await dialogs.withLoading('Guardando entrenamiento...', async () => {
+                await api.saveWorkout(payload);
+                await api.deleteDraft();
+            });
             persistence.clearPersistedDraft();
             state.draftDirty = false;
             await dialogs.alert('Entrenamiento guardado', 'El entrenamiento se ha guardado correctamente.');
@@ -761,7 +763,9 @@ export function createWorkoutController({
             return;
         }
 
-        await resetApp(true);
+        await dialogs.withLoading('Cancelando entrenamiento...', async () => {
+            await resetApp(true);
+        });
     }
 
     function init() {

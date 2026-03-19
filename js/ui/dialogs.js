@@ -4,8 +4,27 @@ export function createDialogController({
     dialogTitle,
     dialogMessage,
     dialogCancelBtn,
-    dialogConfirmBtn
+    dialogConfirmBtn,
+    loadingOverlay,
+    loadingOverlayText
 }) {
+    let loadingDepth = 0;
+
+    function showLoading(message = 'Cargando...') {
+        loadingDepth += 1;
+        if (loadingOverlayText) {
+            loadingOverlayText.textContent = message;
+        }
+        loadingOverlay?.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        loadingDepth = Math.max(0, loadingDepth - 1);
+        if (loadingDepth === 0) {
+            loadingOverlay?.classList.add('hidden');
+        }
+    }
+
     function processDialogQueue() {
         if (state.isDialogOpen || state.dialogQueue.length === 0) {
             return;
@@ -47,6 +66,15 @@ export function createDialogController({
         }
     }
 
+    async function withLoading(message, action) {
+        showLoading(message);
+        try {
+            return await action();
+        } finally {
+            hideLoading();
+        }
+    }
+
     function init() {
         dialogCancelBtn.addEventListener('click', () => closeDialog(false));
         dialogConfirmBtn.addEventListener('click', () => closeDialog(true));
@@ -59,6 +87,9 @@ export function createDialogController({
 
     return {
         init,
+        showLoading,
+        hideLoading,
+        withLoading,
         confirm(title, message) {
             return enqueueDialog(title, message, 'confirm');
         },

@@ -79,6 +79,8 @@ function getElements() {
         dialogMessage: document.getElementById('dialog-message'),
         dialogCancelBtn: document.getElementById('dialog-cancel-btn'),
         dialogConfirmBtn: document.getElementById('dialog-confirm-btn'),
+        loadingOverlay: document.getElementById('loading-overlay'),
+        loadingOverlayText: document.getElementById('loading-overlay-text'),
         chartModal: document.getElementById('chart-modal'),
         closeChartBtn: document.getElementById('close-chart-btn'),
         chartTitle: document.getElementById('chart-title'),
@@ -577,7 +579,9 @@ export function initApp() {
         dialogTitle: elements.dialogTitle,
         dialogMessage: elements.dialogMessage,
         dialogCancelBtn: elements.dialogCancelBtn,
-        dialogConfirmBtn: elements.dialogConfirmBtn
+        dialogConfirmBtn: elements.dialogConfirmBtn,
+        loadingOverlay: elements.loadingOverlay,
+        loadingOverlayText: elements.loadingOverlayText
     });
 
     const persistence = createPersistenceService({
