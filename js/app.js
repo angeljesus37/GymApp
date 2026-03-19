@@ -384,7 +384,20 @@ export function initApp() {
         elements.currentUserName.textContent = '';
         closeUserMenu();
         resetWorkoutState();
+        setAuthLoading(false);
         setAuthStatusText(statusText, tone);
+    }
+
+    function showAuthLoading(statusText = 'Restaurando sesión...') {
+        elements.authView.classList.remove('hidden');
+        elements.appShell.classList.add('hidden');
+        elements.userSessionBar.classList.add('hidden');
+        elements.currentUserDisplay.textContent = '';
+        elements.currentUserName.textContent = '';
+        closeUserMenu();
+        resetWorkoutState();
+        setAuthLoading(true);
+        setAuthStatusText(statusText, 'muted');
     }
 
     function showAppShell() {
@@ -394,6 +407,7 @@ export function initApp() {
         elements.currentUserDisplay.textContent = getUserInitial(state.currentUser);
         elements.currentUserName.textContent = formatUserName(state.currentUser);
         closeUserMenu();
+        setAuthLoading(false);
         setAuthStatusText('', 'success');
     }
 
@@ -555,6 +569,7 @@ export function initApp() {
 
     async function restoreAuthSession() {
         try {
+            showAuthLoading();
             const sessionData = await api.getSession();
             if (!sessionData.authenticated) {
                 showAuthView();
@@ -628,7 +643,6 @@ export function initApp() {
 
     window.addEventListener('resize', () => updateNavHighlight());
 
-    showAuthView();
     setPasswordVisibility(false);
     requestAnimationFrame(() => updateNavHighlight());
     restoreAuthSession();
