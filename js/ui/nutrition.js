@@ -83,6 +83,8 @@ export function createNutritionController({ elements, api, dialogs }) {
         goals: defaultGoals(),
         entries: []
     };
+    let _lastFetchedAt = 0;
+    const CACHE_TTL_MS = 60_000; // reuse data if fetched within the last 60 s
 
     function getSelectedDate() {
         return elements.nutritionDateInput.value || toIsoDate(new Date());
@@ -156,7 +158,7 @@ export function createNutritionController({ elements, api, dialogs }) {
                     await dialogs.withLoading('Eliminando alimento...', async () => {
                         await api.deleteNutritionEntry(entryId);
                     });
-                    await loadNutrition();
+                    await loadNutrition(true);
                 } catch (error) {
                     console.error('Error eliminando alimento:', error);
                     await dialogs.alert('Nutricion', error.message || 'No se pudo eliminar el alimento.');
@@ -277,7 +279,12 @@ export function createNutritionController({ elements, api, dialogs }) {
         bindDayActions();
     }
 
-    async function loadNutrition() {
+    async function loadNutrition(force = false) {
+        // Skip network round-trip if data was freshly loaded (e.g. on repeated tab switches)
+        if (!force && _lastFetchedAt && Date.now() - _lastFetchedAt < CACHE_TTL_MS) {
+            renderNutrition();
+            return;
+        }
         try {
             const payload = await api.getNutrition();
             nutritionData = {
@@ -298,6 +305,7 @@ export function createNutritionController({ elements, api, dialogs }) {
                     notes: String(entry.notes || '')
                 })).filter((entry) => entry.id && entry.date && entry.name) : [])
             };
+            _lastFetchedAt = Date.now();
             renderNutrition();
         } catch (error) {
             console.error('Error cargando nutricion:', error);
@@ -319,7 +327,7 @@ export function createNutritionController({ elements, api, dialogs }) {
             elements.saveNutritionGoalsBtn.disabled = true;
             elements.saveNutritionGoalsBtn.textContent = 'Guardando...';
             await api.saveNutritionGoals(payload);
-            await loadNutrition();
+            await loadNutrition(true);
         } catch (error) {
             console.error('Error guardando objetivos:', error);
             await dialogs.alert('Nutricion', error.message || 'No se pudieron guardar los objetivos.');
@@ -363,7 +371,7 @@ export function createNutritionController({ elements, api, dialogs }) {
             elements.nutritionFoodCarbsInput.value = '';
             elements.nutritionFoodFatInput.value = '';
             elements.nutritionFoodNotesInput.value = '';
-            await loadNutrition();
+            await loadNutrition(true);
             elements.nutritionFoodNameInput.focus();
         } catch (error) {
             console.error('Error guardando alimento:', error);

@@ -136,6 +136,8 @@ function formatShortDate(value) {
 export function createProgressController({ elements, state, api, dialogs }) {
     let allWorkouts = [];
     let bodyWeightEntries = [];
+    let _lastFetchedAt = 0;
+    const CACHE_TTL_MS = 60_000; // reuse data if fetched within the last 60 s
 
     function ensureMonthCursor() {
         if (!state.progressMonthCursor) {
@@ -343,7 +345,12 @@ export function createProgressController({ elements, state, api, dialogs }) {
         renderWeightChart();
     }
 
-    async function loadProgress() {
+    async function loadProgress(force = false) {
+        // Skip network round-trip if data was freshly loaded (e.g. on repeated tab switches)
+        if (!force && _lastFetchedAt && Date.now() - _lastFetchedAt < CACHE_TTL_MS) {
+            renderProgress();
+            return;
+        }
         try {
             const [history, weightEntries] = await Promise.all([
                 api.getHistory('Todos'),
@@ -354,6 +361,7 @@ export function createProgressController({ elements, state, api, dialogs }) {
                 date: String(entry.date),
                 weight: Number(entry.weight)
             })).filter((entry) => entry.date && Number.isFinite(entry.weight)) : [];
+            _lastFetchedAt = Date.now();
             renderProgress();
         } catch (error) {
             console.error('Error cargando progreso:', error);
@@ -378,7 +386,7 @@ export function createProgressController({ elements, state, api, dialogs }) {
             elements.saveBodyWeightBtn.textContent = 'Guardando...';
             await api.saveBodyWeight({ date, weight });
             elements.bodyWeightInput.value = '';
-            await loadProgress();
+            await loadProgress(true);
         } catch (error) {
             console.error('Error guardando peso corporal:', error);
             await dialogs.alert('Peso corporal', error.message || 'No se pudo guardar el peso.');

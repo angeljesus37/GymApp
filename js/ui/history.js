@@ -93,6 +93,11 @@ export function createHistoryController({ elements, state, api, dialogs }) {
     let currentChartMetric = 'avgWeight';
     let currentChartContext = null;
     let areHistoryToolsCollapsed = false;
+    // Simple cache: avoid re-fetching on tab switch when filters haven't changed
+    let _cachedHistory = null;
+    let _cachedCacheKey = '';
+    let _lastFetchedAt = 0;
+    const CACHE_TTL_MS = 60_000;
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -533,7 +538,7 @@ export function createHistoryController({ elements, state, api, dialogs }) {
             if (elements.historyView.classList.contains('hidden')) {
                 await showHistory();
             } else {
-                await loadFullHistory();
+                await loadFullHistory(true);
             }
         } catch (error) {
             console.error('Error eliminando entrenamiento:', error);
@@ -717,15 +722,26 @@ export function createHistoryController({ elements, state, api, dialogs }) {
         }
     }
 
-    async function loadFullHistory() {
+    async function loadFullHistory(force = false) {
+        const filterType  = elements.historyFilterType.value;
+        const filterDate  = elements.historyFilterDate.value;
+        const filterMonth = elements.historyFilterMonth.value;
+        const cacheKey = `${filterType}|${filterDate}|${filterMonth}`;
+
+        // Reuse cached response if filters are the same and data is still fresh
+        if (!force && _cachedHistory && cacheKey === _cachedCacheKey && Date.now() - _lastFetchedAt < CACHE_TTL_MS) {
+            const filteredHistory = filterHistoryByExercise(_cachedHistory, elements.historyFilterExercise.value);
+            renderHistoryList(filteredHistory, elements.fullHistoryContainer);
+            return;
+        }
+
         elements.fullHistoryContainer.innerHTML = 'Cargando...';
 
         try {
-            const history = await api.getHistory(
-                elements.historyFilterType.value,
-                elements.historyFilterDate.value,
-                elements.historyFilterMonth.value
-            );
+            const history = await api.getHistory(filterType, filterDate, filterMonth);
+            _cachedHistory = history;
+            _cachedCacheKey = cacheKey;
+            _lastFetchedAt = Date.now();
             updateExerciseSuggestions(history);
             const filteredHistory = filterHistoryByExercise(history, elements.historyFilterExercise.value);
             renderHistoryList(filteredHistory, elements.fullHistoryContainer);
@@ -741,7 +757,7 @@ export function createHistoryController({ elements, state, api, dialogs }) {
         elements.historyFilterDate.value = '';
         elements.historyFilterMonth.value = '';
         elements.historyFilterExercise.value = '';
-        loadFullHistory();
+        loadFullHistory(true);
     }
 
     function handleExactDateChange() {
@@ -749,7 +765,7 @@ export function createHistoryController({ elements, state, api, dialogs }) {
             elements.historyFilterMonth.value = '';
         }
 
-        loadFullHistory();
+        loadFullHistory(true);
     }
 
     function handleMonthChange() {
@@ -757,7 +773,7 @@ export function createHistoryController({ elements, state, api, dialogs }) {
             elements.historyFilterDate.value = '';
         }
 
-        loadFullHistory();
+        loadFullHistory(true);
     }
 
     function closeChart() {
@@ -772,14 +788,14 @@ export function createHistoryController({ elements, state, api, dialogs }) {
     }
 
     function init() {
-        elements.applyFiltersBtn.addEventListener('click', loadFullHistory);
+        elements.applyFiltersBtn.addEventListener('click', () => loadFullHistory(true));
         elements.clearFiltersBtn?.addEventListener('click', clearFilters);
         elements.toggleHistoryToolsBtn?.addEventListener('click', () => {
             areHistoryToolsCollapsed = !areHistoryToolsCollapsed;
             updateHistoryToolsVisibility();
         });
-        elements.historyFilterExercise?.addEventListener('input', loadFullHistory);
-        elements.historyFilterType?.addEventListener('change', loadFullHistory);
+        elements.historyFilterExercise?.addEventListener('input', () => loadFullHistory(true));
+        elements.historyFilterType?.addEventListener('change', () => loadFullHistory(true));
         elements.historyFilterDate?.addEventListener('change', handleExactDateChange);
         elements.historyFilterMonth?.addEventListener('change', handleMonthChange);
         elements.closeModalBtn?.addEventListener('click', () => elements.historyModal.classList.add('hidden'));

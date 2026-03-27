@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_from_directory, session
+from flask_compress import Compress
 import os
 import json
 import uuid
@@ -9,6 +10,11 @@ try:
     import psycopg
 except ImportError:
     psycopg = None
+
+try:
+    from psycopg_pool import ConnectionPool as _ConnectionPool
+except ImportError:
+    _ConnectionPool = None
 
 
 # ---------------------------------------------------------------------------
@@ -41,6 +47,15 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = env_flag('SESSION_COOKIE_SECURE', env_flag('RENDER', False))
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+# Gzip compression for API responses and static assets
+app.config['COMPRESS_MIMETYPES'] = [
+    'text/html', 'text/css', 'text/javascript', 'application/javascript',
+    'application/json', 'application/xml', 'text/xml',
+]
+app.config['COMPRESS_LEVEL'] = 6
+app.config['COMPRESS_MIN_SIZE'] = 500
+Compress(app)
+
 DATABASE_URL      = normalize_database_url(os.environ.get('DATABASE_URL'))
 SUPABASE_URL      = os.environ.get('SUPABASE_URL', 'https://sylngstouzbutzzaxcna.supabase.co')
 SUPABASE_ANON_KEY = os.environ.get(
@@ -56,11 +71,19 @@ DEFAULT_USERNAME = 'mario'
 LEGACY_TYPE_MAP = {'Brazo': 'Triceps'}
 
 FRONTEND_ASSET_EXTENSIONS = {'.html', '.css', '.js', '.mjs', '.json', '.map', '.ico'}
+# Static assets (JS/CSS) that can be cached by the browser
+_CACHEABLE_EXTENSIONS = {'.css', '.js', '.mjs', '.map', '.ico'}
+_STATIC_CACHE_MAX_AGE = 300  # 5 minutes — short enough to pick up deploys quickly
 
 
 def is_frontend_asset(path):
     _, extension = os.path.splitext(str(path or '').lower())
     return extension in FRONTEND_ASSET_EXTENSIONS
+
+
+def _is_cacheable_static(path):
+    _, extension = os.path.splitext(str(path or '').lower())
+    return extension in _CACHEABLE_EXTENSIONS
 
 
 def apply_no_cache_headers(response):
@@ -72,15 +95,34 @@ def apply_no_cache_headers(response):
 
 
 # ---------------------------------------------------------------------------
-# Base de datos — conexión directa (psycopg3)
+# Base de datos — connection pool (psycopg3)
 # ---------------------------------------------------------------------------
 
-def get_postgres_connection():
+_db_pool = None
+
+
+def _get_pool():
+    """Lazy-initialises and returns the shared connection pool."""
+    global _db_pool
+    if _db_pool is not None:
+        return _db_pool
     if not DATABASE_URL:
         raise RuntimeError('DATABASE_URL no configurada.')
-    if psycopg is None:
-        raise RuntimeError('psycopg es obligatorio cuando DATABASE_URL está configurada.')
-    return psycopg.connect(DATABASE_URL)
+    if _ConnectionPool is None:
+        raise RuntimeError('psycopg[pool] es obligatorio cuando DATABASE_URL está configurada.')
+    _db_pool = _ConnectionPool(
+        DATABASE_URL,
+        min_size=1,
+        max_size=4,
+        open=True,
+        reconnect_timeout=5,
+    )
+    return _db_pool
+
+
+def get_db_conn():
+    """Returns a pooled connection context manager."""
+    return _get_pool().connection()
 
 
 # ---------------------------------------------------------------------------
@@ -156,7 +198,7 @@ def supabase_admin_update_password(user_id: str, new_password: str) -> bool:
 
 def get_profile_by_username(username: str):
     """Devuelve (user_id_str, email) o (None, None)."""
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -175,7 +217,7 @@ def get_profile_by_username(username: str):
 
 def get_username_by_id(user_id: str):
     """Devuelve username dado un user_id UUID (str)."""
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT username FROM public.profiles WHERE id = %s::uuid",
@@ -186,14 +228,14 @@ def get_username_by_id(user_id: str):
 
 
 def username_exists(username: str) -> bool:
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT 1 FROM public.profiles WHERE username = %s", (username,))
             return cur.fetchone() is not None
 
 
 def create_profile(user_id: str, username: str):
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO public.profiles (id, username) VALUES (%s::uuid, %s)",
@@ -477,12 +519,11 @@ def _row_to_workout(row):
     }
 
 
-def load_data_for_user(username: str):
-    user_id, _ = get_profile_by_username(username)
+def load_data_for_user(user_id: str):
     if not user_id:
         return []
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -533,9 +574,8 @@ def load_data_for_user(username: str):
     return workouts
 
 
-def save_single_workout(username: str, workout: dict):
+def save_single_workout(user_id: str, workout: dict):
     """Guarda (upsert por fecha) un entrenamiento con sus ejercicios y series."""
-    user_id, _ = get_profile_by_username(username)
     if not user_id:
         return None
 
@@ -545,7 +585,7 @@ def save_single_workout(username: str, workout: dict):
 
     w_id = str(workout.get('id') or uuid.uuid4())
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -584,11 +624,10 @@ def save_single_workout(username: str, workout: dict):
     return w_id
 
 
-def delete_workout_by_id(username: str, workout_id: str):
-    user_id, _ = get_profile_by_username(username)
+def delete_workout_by_id(user_id: str, workout_id: str):
     if not user_id:
         return
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM public.workouts WHERE id = %s::uuid AND user_id = %s::uuid",
@@ -601,12 +640,11 @@ def delete_workout_by_id(username: str, workout_id: str):
 # Operaciones de borrador
 # ---------------------------------------------------------------------------
 
-def load_draft_for_user(username: str):
-    user_id, _ = get_profile_by_username(username)
+def load_draft_for_user(user_id: str):
     if not user_id:
         return None
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT date, types, exercises, saved_at "
@@ -631,13 +669,12 @@ def load_draft_for_user(username: str):
     }
 
 
-def save_draft_for_user(username: str, draft):
-    user_id, _ = get_profile_by_username(username)
+def save_draft_for_user(user_id: str, draft):
     if not user_id:
         return
 
     if draft is None:
-        with get_postgres_connection() as conn:
+        with get_db_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("DELETE FROM public.workout_drafts WHERE user_id = %s::uuid", (user_id,))
             conn.commit()
@@ -648,7 +685,7 @@ def save_draft_for_user(username: str, draft):
     date_val = draft.get('date') or None
     saved_at = draft.get('savedAt') or datetime.now().isoformat()
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -663,20 +700,19 @@ def save_draft_for_user(username: str, draft):
         conn.commit()
 
 
-def delete_draft_for_user(username: str):
-    save_draft_for_user(username, None)
+def delete_draft_for_user(user_id: str):
+    save_draft_for_user(user_id, None)
 
 
 # ---------------------------------------------------------------------------
 # Operaciones de peso corporal
 # ---------------------------------------------------------------------------
 
-def load_body_weight_for_user(username: str):
-    user_id, _ = get_profile_by_username(username)
+def load_body_weight_for_user(user_id: str):
     if not user_id:
         return []
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT date, weight FROM public.body_weight_entries "
@@ -688,12 +724,11 @@ def load_body_weight_for_user(username: str):
     return [{'date': str(r[0]), 'weight': float(r[1])} for r in rows]
 
 
-def save_body_weight_for_user(username: str, entry: dict):
-    user_id, _ = get_profile_by_username(username)
+def save_body_weight_for_user(user_id: str, entry: dict):
     if not user_id:
         return
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -710,12 +745,11 @@ def save_body_weight_for_user(username: str, entry: dict):
 # Operaciones de nutrición
 # ---------------------------------------------------------------------------
 
-def load_nutrition_for_user(username: str):
-    user_id, _ = get_profile_by_username(username)
+def load_nutrition_for_user(user_id: str):
     if not user_id:
         return {'goals': default_nutrition_goals(), 'entries': []}
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT calories, protein, carbs, fat "
@@ -762,13 +796,12 @@ def load_nutrition_for_user(username: str):
     return {'goals': goals, 'entries': entries}
 
 
-def save_nutrition_goals_for_user(username: str, goals: dict):
-    user_id, _ = get_profile_by_username(username)
+def save_nutrition_goals_for_user(user_id: str, goals: dict):
     if not user_id:
         return default_nutrition_goals()
 
     g = normalize_nutrition_goals(goals)
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -786,8 +819,7 @@ def save_nutrition_goals_for_user(username: str, goals: dict):
     return g
 
 
-def save_nutrition_entry_for_user(username: str, entry: dict):
-    user_id, _ = get_profile_by_username(username)
+def save_nutrition_entry_for_user(user_id: str, entry: dict):
     if not user_id:
         return None
 
@@ -795,7 +827,7 @@ def save_nutrition_entry_for_user(username: str, entry: dict):
     if not e:
         return None
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
@@ -817,12 +849,11 @@ def save_nutrition_entry_for_user(username: str, entry: dict):
     return e
 
 
-def delete_nutrition_entry_for_user(username: str, entry_id: str):
-    user_id, _ = get_profile_by_username(username)
+def delete_nutrition_entry_for_user(user_id: str, entry_id: str):
     if not user_id:
         return
 
-    with get_postgres_connection() as conn:
+    with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM public.nutrition_entries "
@@ -844,26 +875,30 @@ def set_logged_in_user(user_id: str, username: str):
 
 
 def get_logged_in_username():
+    # Flask sessions are HMAC-signed server-side cookies — data is trusted.
     user_id  = session.get('user_id')
     username = session.get('username')
-
     if not user_id or not username:
         session.clear()
         return None
-
-    db_username = get_username_by_id(user_id)
-    if not db_username or db_username != username:
-        session.clear()
-        return None
-
     return username
 
 
+def get_logged_in_user():
+    """Returns (username, user_id) from the signed session, or (None, None)."""
+    user_id  = session.get('user_id')
+    username = session.get('username')
+    if not user_id or not username:
+        session.clear()
+        return None, None
+    return username, user_id
+
+
 def require_auth():
-    username = get_logged_in_username()
+    username, user_id = get_logged_in_user()
     if not username:
-        return None, (jsonify({'status': 'error', 'message': 'Sesión no iniciada.'}), 401)
-    return username, None
+        return None, None, (jsonify({'status': 'error', 'message': 'Sesión no iniciada.'}), 401)
+    return username, user_id, None
 
 
 # ---------------------------------------------------------------------------
@@ -935,9 +970,53 @@ def logout():
 # Endpoints de entrenamientos
 # ---------------------------------------------------------------------------
 
+def _get_workout_by_date(user_id: str, date: str):
+    """Targeted single-row lookup — avoids loading all workouts just to check one date."""
+    _WORKOUT_SQL = """
+        SELECT w.id, w.date, w.types,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'name',      e.name,
+                'type',      e.type,
+                'collapsed', e.collapsed,
+                'sets', (
+                  SELECT COALESCE(json_agg(
+                    json_build_object(
+                      'reps',             s.reps,
+                      'weight',           s.weight,
+                      'duration_seconds', s.duration_seconds,
+                      'avg_speed',        s.avg_speed,
+                      'completed',        s.completed
+                    ) ORDER BY s.position
+                  ), '[]'::json)
+                  FROM public.exercise_sets s
+                  WHERE s.exercise_id = e.id
+                )
+              ) ORDER BY e.position
+            ) FILTER (WHERE e.id IS NOT NULL),
+            '[]'
+          ) AS exercises
+        FROM public.workouts w
+        LEFT JOIN public.workout_exercises e ON e.workout_id = w.id
+        WHERE w.user_id = %s::uuid AND w.date = %s::date
+        GROUP BY w.id, w.date, w.types
+    """
+    with get_db_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(_WORKOUT_SQL, (user_id, date))
+            row = cur.fetchone()
+    if row is None:
+        return None
+    exercises_raw = row[3]
+    if isinstance(exercises_raw, str):
+        exercises_raw = json.loads(exercises_raw)
+    return _row_to_workout((row[0], row[1], row[2], exercises_raw))
+
+
 @app.route('/api/save_workout', methods=['POST'])
 def save_workout():
-    username, auth_error = require_auth()
+    username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
@@ -947,11 +1026,8 @@ def save_workout():
     if not new_workout['types']:
         return jsonify({'status': 'error', 'message': 'Falta grupo muscular o tipos.'}), 400
 
-    # Obtener o reutilizar ID del día existente
-    existing = next(
-        (w for w in load_data_for_user(username) if w.get('date') == new_workout['date']),
-        None
-    )
+    # Targeted lookup: avoid loading ALL workouts just to find one by date
+    existing = _get_workout_by_date(user_id, new_workout['date'])
     new_workout['id'] = existing.get('id') if existing and existing.get('id') else str(uuid.uuid4())
 
     # Merge de ejercicios si ya había entrenamiento ese día
@@ -961,27 +1037,27 @@ def save_workout():
         merged_types = list(dict.fromkeys(existing.get('types', []) + new_workout.get('types', [])))
         new_workout['types'] = merged_types
 
-    save_single_workout(username, new_workout)
+    save_single_workout(user_id, new_workout)
     return jsonify({'status': 'success', 'message': 'Entrenamiento guardado.'})
 
 
 @app.route('/api/delete_workout/<string:workout_id>', methods=['DELETE'])
 def delete_workout(workout_id):
-    username, auth_error = require_auth()
+    username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    delete_workout_by_id(username, workout_id)
+    delete_workout_by_id(user_id, workout_id)
     return jsonify({'status': 'success', 'message': 'Entrenamiento eliminado.'})
 
 
 @app.route('/api/history', methods=['GET'])
 def get_all_history():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    all_workouts = load_data_for_user(username)
+    all_workouts = load_data_for_user(user_id)
 
     w_type  = canonicalize_type(request.args.get('type')) if request.args.get('type') else None
     w_date  = request.args.get('date')
@@ -1003,13 +1079,11 @@ def get_all_history():
 
 @app.route('/api/latest_exercises/<string:workout_type>', methods=['GET'])
 def get_latest_exercises(workout_type):
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    all_workouts    = load_data_for_user(username)
-    normalized_type = canonicalize_type(workout_type)
-
+    all_workouts    = load_data_for_user(user_id)
     workouts_by_type = [f for f in (filter_workout_by_type(w, normalized_type) for w in all_workouts) if f]
     workouts_by_type.sort(key=lambda x: x.get('date', ''), reverse=True)
 
@@ -1025,11 +1099,11 @@ def get_latest_exercises(workout_type):
 
 @app.route('/api/history/<string:workout_type>', methods=['GET'])
 def get_workout_history(workout_type):
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    all_workouts    = load_data_for_user(username)
+    all_workouts    = load_data_for_user(user_id)
     normalized_type = canonicalize_type(workout_type)
 
     workouts_by_type = [f for f in (filter_workout_by_type(w, normalized_type) for w in all_workouts) if f]
@@ -1044,7 +1118,7 @@ def get_workout_history(workout_type):
 
 @app.route('/api/save_draft', methods=['POST'])
 def save_draft_workout():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
@@ -1055,26 +1129,26 @@ def save_draft_workout():
     draft['isDraft'] = True
     draft['savedAt'] = datetime.now().isoformat()
 
-    save_draft_for_user(username, draft)
+    save_draft_for_user(user_id, draft)
     return jsonify({'status': 'success', 'message': 'Borrador guardado.'})
 
 
 @app.route('/api/get_draft', methods=['GET'])
 def get_draft():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    return jsonify(load_draft_for_user(username))
+    return jsonify(load_draft_for_user(user_id))
 
 
 @app.route('/api/delete_draft', methods=['DELETE'])
 def delete_draft():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    delete_draft_for_user(username)
+    delete_draft_for_user(user_id)
     return jsonify({'status': 'success', 'message': 'Borrador eliminado.'})
 
 
@@ -1084,18 +1158,18 @@ def delete_draft():
 
 @app.route('/api/body_weight', methods=['GET'])
 def get_body_weight():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    entries = load_body_weight_for_user(username)
+    entries = load_body_weight_for_user(user_id)
     entries.sort(key=lambda item: item.get('date', ''), reverse=True)
     return jsonify(entries)
 
 
 @app.route('/api/body_weight', methods=['POST'])
 def save_body_weight():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
@@ -1103,7 +1177,7 @@ def save_body_weight():
     if not entry:
         return jsonify({'status': 'error', 'message': 'Fecha o peso corporal invalidos.'}), 400
 
-    save_body_weight_for_user(username, entry)
+    save_body_weight_for_user(user_id, entry)
     return jsonify({'status': 'success', 'entry': entry})
 
 
@@ -1113,11 +1187,11 @@ def save_body_weight():
 
 @app.route('/api/nutrition', methods=['GET'])
 def get_nutrition():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    payload = load_nutrition_for_user(username)
+    payload = load_nutrition_for_user(user_id)
     payload['entries'].sort(
         key=lambda item: (item.get('date', ''), item.get('meal', ''), item.get('name', '')),
         reverse=True
@@ -1127,21 +1201,21 @@ def get_nutrition():
 
 @app.route('/api/nutrition/goals', methods=['POST'])
 def save_nutrition_goals():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    goals = save_nutrition_goals_for_user(username, request.get_json() or {})
+    goals = save_nutrition_goals_for_user(user_id, request.get_json() or {})
     return jsonify({'status': 'success', 'goals': goals})
 
 
 @app.route('/api/nutrition/entry', methods=['POST'])
 def save_nutrition_entry():
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    entry = save_nutrition_entry_for_user(username, request.get_json() or {})
+    entry = save_nutrition_entry_for_user(user_id, request.get_json() or {})
     if not entry:
         return jsonify({
             'status': 'error',
@@ -1153,11 +1227,11 @@ def save_nutrition_entry():
 
 @app.route('/api/nutrition/entry/<string:entry_id>', methods=['DELETE'])
 def delete_nutrition_entry(entry_id):
-    username, auth_error = require_auth()
+    _username, user_id, auth_error = require_auth()
     if auth_error:
         return auth_error
 
-    delete_nutrition_entry_for_user(username, entry_id)
+    delete_nutrition_entry_for_user(user_id, entry_id)
     return jsonify({'status': 'success', 'message': 'Entrada eliminada.'})
 
 
@@ -1179,6 +1253,9 @@ def index():
 @app.route('/<path:path>')
 def static_files(path):
     if os.path.exists(path):
+        if _is_cacheable_static(path):
+            # JS/CSS can be cached; HTML stays no-cache (it bootstraps the app)
+            return send_from_directory('.', path, max_age=_STATIC_CACHE_MAX_AGE)
         response = send_from_directory('.', path, max_age=0, conditional=False, etag=False)
         if is_frontend_asset(path):
             return apply_no_cache_headers(response)
