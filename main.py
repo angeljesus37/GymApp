@@ -1084,6 +1084,7 @@ def get_latest_exercises(workout_type):
         return auth_error
 
     all_workouts    = load_data_for_user(user_id)
+    normalized_type = canonicalize_type(workout_type)
     workouts_by_type = [f for f in (filter_workout_by_type(w, normalized_type) for w in all_workouts) if f]
     workouts_by_type.sort(key=lambda x: x.get('date', ''), reverse=True)
 
