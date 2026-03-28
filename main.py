@@ -3,6 +3,8 @@ from flask_compress import Compress
 import os
 import json
 import uuid
+import threading
+import time
 import requests as http_requests
 from datetime import datetime, timedelta
 
@@ -123,6 +125,23 @@ def _get_pool():
 def get_db_conn():
     """Returns a pooled connection context manager."""
     return _get_pool().connection()
+
+
+# ---------------------------------------------------------------------------
+# Caché en memoria del servidor para datos de entrenamientos
+# ---------------------------------------------------------------------------
+# Keyed by user_id. Each entry: (workouts_list, monotonic_timestamp)
+# Shared across threads in the single gunicorn worker.
+# Invalidated immediately on any write or delete.
+
+_workout_cache: dict = {}
+_workout_cache_lock = threading.RLock()
+_WORKOUT_CACHE_TTL = 60  # seconds
+
+
+def _invalidate_workout_cache(user_id: str):
+    with _workout_cache_lock:
+        _workout_cache.pop(user_id, None)
 
 
 # ---------------------------------------------------------------------------
@@ -523,6 +542,12 @@ def load_data_for_user(user_id: str):
     if not user_id:
         return []
 
+    # Serve from in-process cache if still fresh
+    with _workout_cache_lock:
+        cached = _workout_cache.get(user_id)
+        if cached and time.monotonic() - cached[1] < _WORKOUT_CACHE_TTL:
+            return cached[0]
+
     with get_db_conn() as conn:
         with conn.cursor() as cur:
             cur.execute(
@@ -570,6 +595,9 @@ def load_data_for_user(user_id: str):
         if isinstance(exercises_raw, str):
             exercises_raw = json.loads(exercises_raw)
         workouts.append(_row_to_workout((row[0], row[1], row[2], exercises_raw)))
+
+    with _workout_cache_lock:
+        _workout_cache[user_id] = (workouts, time.monotonic())
 
     return workouts
 
@@ -621,6 +649,7 @@ def save_single_workout(user_id: str, workout: dict):
                     )
         conn.commit()
 
+    _invalidate_workout_cache(user_id)
     return w_id
 
 
@@ -634,6 +663,7 @@ def delete_workout_by_id(user_id: str, workout_id: str):
                 (workout_id, user_id)
             )
         conn.commit()
+    _invalidate_workout_cache(user_id)
 
 
 # ---------------------------------------------------------------------------
