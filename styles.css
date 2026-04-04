@@ -828,6 +828,17 @@ select {
     box-shadow: 0 8px 18px rgba(148, 163, 184, 0.12);
 }
 
+:root[data-theme="light"] .set-row {
+    border: 1px solid rgba(100, 116, 139, 0.24);
+    border-left-width: 2px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.52);
+}
+
+:root[data-theme="light"] .set-row.completed {
+    border-color: rgba(100, 116, 139, 0.24);
+    border-left-color: var(--success);
+}
+
 :root[data-theme="light"] .exercise-card:hover {
     box-shadow: 0 10px 22px rgba(148, 163, 184, 0.15);
     border-color: rgba(96, 165, 250, 0.14);
