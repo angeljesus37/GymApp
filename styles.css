@@ -1020,29 +1020,34 @@ button:hover {
 }
 
 .sticky-save-bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-    padding: 12px 0;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    background: linear-gradient(to top, var(--dark-bg) 60%, transparent);
+    margin-top: 18px;
 }
 
 #finish-workout-btn {
     width: 100%;
-    padding: 14px 24px;
-    font-size: 1.05rem;
+    min-height: 52px;
+    padding: 15px 20px;
+    font-size: 1rem;
     font-weight: 700;
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.25);
-    letter-spacing: 0.01em;
+    color: var(--text-light);
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 1px rgba(2, 6, 23, 0.18);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(15, 23, 42, 0.98) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 16px 32px rgba(2, 6, 23, 0.28);
 }
 
 #finish-workout-btn:hover {
-    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.35);
+    border-color: rgba(96, 165, 250, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 34px rgba(2, 6, 23, 0.34);
+}
+
+#finish-workout-btn:disabled {
+    opacity: 0.72;
+    cursor: wait;
+    transform: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 24px rgba(2, 6, 23, 0.22);
 }
 
 #cancel-workout-btn {
@@ -3192,6 +3197,18 @@ button:hover {
     #view-history-btn,
     #cancel-workout-btn {
         width: 100%;
+    }
+
+    .sticky-save-bar {
+        position: sticky;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        z-index: 18;
+        margin-top: 16px;
+    }
+
+    #finish-workout-btn {
+        min-height: 50px;
+        border-radius: 14px;
     }
 
     /* Form Groups */
