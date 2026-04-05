@@ -834,6 +834,20 @@ select {
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.52);
 }
 
+:root[data-theme="light"] .confirm-set-btn {
+    background: rgba(96, 165, 250, 0.22);
+    border-color: rgba(96, 165, 250, 0.3);
+    color: rgba(29, 78, 216, 0.92);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.42);
+}
+
+:root[data-theme="light"] .confirm-set-btn:hover {
+    background: rgba(96, 165, 250, 0.3);
+    border-color: rgba(59, 130, 246, 0.36);
+    color: rgba(29, 78, 216, 1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
 :root[data-theme="light"] .set-row.completed {
     border-color: rgba(100, 116, 139, 0.24);
     border-left-color: var(--success);
@@ -1505,7 +1519,7 @@ button:hover {
     border-radius: 50%;
     background: var(--control-surface-gradient);
     border: 1px solid rgba(148, 163, 184, 0.2);
-    color: transparent;
+    color: var(--text-muted);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1523,10 +1537,15 @@ button:hover {
     display: block;
     width: 16px;
     height: 16px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
     transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
     transform: rotate(0deg);
 }
@@ -1534,18 +1553,16 @@ button:hover {
 .toggle-exercise-btn:hover {
     border-color: rgba(96, 165, 250, 0.35);
     background: linear-gradient(180deg, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.08));
+    color: var(--accent-blue);
     transform: scale(1.08);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 22px rgba(37, 99, 235, 0.16);
-}
-
-.toggle-exercise-btn:hover::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 .toggle-exercise-btn:focus-visible {
     outline: none;
     border-color: rgba(96, 165, 250, 0.52);
     background: linear-gradient(180deg, rgba(96, 165, 250, 0.18), rgba(96, 165, 250, 0.08));
+    color: var(--accent-blue);
     box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.18), inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 22px rgba(37, 99, 235, 0.16);
 }
 
