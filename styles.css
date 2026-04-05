@@ -853,6 +853,14 @@ select {
     border-left-color: var(--success);
 }
 
+:root[data-theme="light"] .set-row.completed .confirm-set-btn,
+:root[data-theme="light"] .set-row.completed .confirm-set-btn:hover {
+    background: var(--success);
+    color: white;
+    border-color: transparent;
+    box-shadow: none;
+}
+
 :root[data-theme="light"] .exercise-card:hover {
     box-shadow: 0 10px 22px rgba(148, 163, 184, 0.15);
     border-color: rgba(96, 165, 250, 0.14);
@@ -1672,7 +1680,7 @@ button:hover {
 .set-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
     padding: 12px;
     background: var(--row-bg);
@@ -1718,8 +1726,7 @@ button:hover {
 .set-actions {
     display: flex;
     gap: 5px;
-    align-self: flex-start;
-    padding-top: 1px;
+    align-items: center;
 }
 
 .confirm-set-btn {
