@@ -1680,7 +1680,7 @@ button:hover {
 .set-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     padding: 12px;
     background: var(--row-bg);
@@ -1727,6 +1727,7 @@ button:hover {
     display: flex;
     gap: 5px;
     align-items: center;
+    align-self: flex-start;
 }
 
 .confirm-set-btn {
